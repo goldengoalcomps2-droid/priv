@@ -1,0 +1,576 @@
+{
+  "report_date": "2026-03-25",
+  "region": "US",
+  "generated_at": "2026-03-25T12:42:33.586246",
+  "market_insights": {
+    "global_gmv_2026": "$60 billion projected",
+    "beauty_share_of_gmv": "22.5%",
+    "beauty_items_sold_2024": "370 million",
+    "fashion_items_sold_2024": "285 million",
+    "sweet_spot_price": "$10-$30",
+    "gen_z_buy_from_creators": "56% buy based on creator endorsement",
+    "gen_z_use_tiktok_for_discovery": "65% use TikTok to discover products",
+    "top_buyer_age": "25-34 (29% of TikTok shoppers)",
+    "gender_split": "63% female",
+    "strategy_2026": "Volume beats celebrity \u2014 hundreds of smaller creators posting authentic content outperform single large partnerships",
+    "content_that_converts": "Before/after, tutorials, unboxing, GRWM, morning routines",
+    "key_aesthetics": "Y2K, quiet luxury, streetcore, clean girl, minimalist",
+    "beauty_trend_shift": "Skin Longevity \u2014 consumers moving from quick fixes to long-term skin health",
+    "emerging_trend": "Climate-Adaptive Beauty \u2014 smart formulas that react to temperature/environment"
+  },
+  "top_10_categories": [
+    {
+      "rank": 1,
+      "category": "Skincare",
+      "total_mentions": 89,
+      "source_count": 11,
+      "confidence": "very_high",
+      "top_keywords": [
+        {
+          "keyword": "korean skincare / K-beauty",
+          "count": 18
+        },
+        {
+          "keyword": "serum",
+          "count": 16
+        },
+        {
+          "keyword": "sunscreen / SPF",
+          "count": 12
+        },
+        {
+          "keyword": "collagen mask",
+          "count": 10
+        },
+        {
+          "keyword": "retinol",
+          "count": 8
+        },
+        {
+          "keyword": "niacinamide",
+          "count": 7
+        },
+        {
+          "keyword": "PDRN / salmon sperm",
+          "count": 6
+        },
+        {
+          "keyword": "exfoliant",
+          "count": 6
+        },
+        {
+          "keyword": "hyaluronic acid",
+          "count": 4
+        },
+        {
+          "keyword": "vitamin C",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "category": "Makeup",
+      "total_mentions": 72,
+      "source_count": 10,
+      "confidence": "very_high",
+      "top_keywords": [
+        {
+          "keyword": "lip oil / lip tint",
+          "count": 19
+        },
+        {
+          "keyword": "foundation",
+          "count": 11
+        },
+        {
+          "keyword": "magnetic lashes",
+          "count": 10
+        },
+        {
+          "keyword": "mascara",
+          "count": 8
+        },
+        {
+          "keyword": "press-on nails",
+          "count": 7
+        },
+        {
+          "keyword": "blush",
+          "count": 6
+        },
+        {
+          "keyword": "setting spray",
+          "count": 5
+        },
+        {
+          "keyword": "concealer",
+          "count": 4
+        },
+        {
+          "keyword": "lip liner",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "category": "Health & Wellness",
+      "total_mentions": 58,
+      "source_count": 9,
+      "confidence": "high",
+      "top_keywords": [
+        {
+          "keyword": "liquid multivitamin",
+          "count": 14
+        },
+        {
+          "keyword": "hair growth supplement",
+          "count": 10
+        },
+        {
+          "keyword": "greens powder",
+          "count": 9
+        },
+        {
+          "keyword": "probiotic",
+          "count": 8
+        },
+        {
+          "keyword": "collagen powder",
+          "count": 7
+        },
+        {
+          "keyword": "electrolyte",
+          "count": 5
+        },
+        {
+          "keyword": "gummy vitamin",
+          "count": 3
+        },
+        {
+          "keyword": "sleep aid",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "category": "Tech & Gadgets",
+      "total_mentions": 53,
+      "source_count": 9,
+      "confidence": "high",
+      "top_keywords": [
+        {
+          "keyword": "LED galaxy projector",
+          "count": 14
+        },
+        {
+          "keyword": "smart posture corrector",
+          "count": 10
+        },
+        {
+          "keyword": "UV-C phone sanitizer",
+          "count": 8
+        },
+        {
+          "keyword": "wireless earbuds",
+          "count": 7
+        },
+        {
+          "keyword": "magnetic phone charger",
+          "count": 6
+        },
+        {
+          "keyword": "portable blender",
+          "count": 4
+        },
+        {
+          "keyword": "smartwatch",
+          "count": 3
+        },
+        {
+          "keyword": "ring light",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "category": "Fashion Accessories",
+      "total_mentions": 48,
+      "source_count": 8,
+      "confidence": "high",
+      "top_keywords": [
+        {
+          "keyword": "crossbody / sling bag",
+          "count": 11
+        },
+        {
+          "keyword": "minimalist jewelry",
+          "count": 9
+        },
+        {
+          "keyword": "claw clip / hair clip",
+          "count": 7
+        },
+        {
+          "keyword": "retro sunglasses",
+          "count": 6
+        },
+        {
+          "keyword": "layered necklace",
+          "count": 5
+        },
+        {
+          "keyword": "tote bag",
+          "count": 4
+        },
+        {
+          "keyword": "silk scarf",
+          "count": 3
+        },
+        {
+          "keyword": "statement rings",
+          "count": 2
+        },
+        {
+          "keyword": "bucket hat",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "category": "Home & Organization",
+      "total_mentions": 44,
+      "source_count": 8,
+      "confidence": "high",
+      "top_keywords": [
+        {
+          "keyword": "cleaning products (#CleanTok)",
+          "count": 12
+        },
+        {
+          "keyword": "candles / diffuser",
+          "count": 8
+        },
+        {
+          "keyword": "organizer / storage",
+          "count": 7
+        },
+        {
+          "keyword": "kitchen gadgets",
+          "count": 6
+        },
+        {
+          "keyword": "posters / wall art",
+          "count": 5
+        },
+        {
+          "keyword": "tumbler / water bottle",
+          "count": 4
+        },
+        {
+          "keyword": "blanket",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "category": "Fragrance",
+      "total_mentions": 39,
+      "source_count": 7,
+      "confidence": "high",
+      "top_keywords": [
+        {
+          "keyword": "perfume dupe",
+          "count": 12
+        },
+        {
+          "keyword": "body mist",
+          "count": 8
+        },
+        {
+          "keyword": "scent layering",
+          "count": 7
+        },
+        {
+          "keyword": "cologne",
+          "count": 5
+        },
+        {
+          "keyword": "luxury fragrance dupe",
+          "count": 4
+        },
+        {
+          "keyword": "unisex scent",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "category": "Hair Care",
+      "total_mentions": 35,
+      "source_count": 7,
+      "confidence": "medium_high",
+      "top_keywords": [
+        {
+          "keyword": "hair oil",
+          "count": 10
+        },
+        {
+          "keyword": "hair growth serum",
+          "count": 8
+        },
+        {
+          "keyword": "hair mask",
+          "count": 6
+        },
+        {
+          "keyword": "silk bonnet",
+          "count": 4
+        },
+        {
+          "keyword": "scalp treatment",
+          "count": 4
+        },
+        {
+          "keyword": "dry shampoo",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "category": "Pet Products",
+      "total_mentions": 28,
+      "source_count": 6,
+      "confidence": "medium",
+      "top_keywords": [
+        {
+          "keyword": "interactive pet toy",
+          "count": 8
+        },
+        {
+          "keyword": "pet accessories",
+          "count": 6
+        },
+        {
+          "keyword": "dog treat",
+          "count": 5
+        },
+        {
+          "keyword": "pet grooming",
+          "count": 4
+        },
+        {
+          "keyword": "cat tree / scratcher",
+          "count": 3
+        },
+        {
+          "keyword": "pet bed",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "category": "Body Care",
+      "total_mentions": 24,
+      "source_count": 6,
+      "confidence": "medium",
+      "top_keywords": [
+        {
+          "keyword": "body scrub",
+          "count": 7
+        },
+        {
+          "keyword": "body butter / lotion",
+          "count": 6
+        },
+        {
+          "keyword": "self tanner",
+          "count": 4
+        },
+        {
+          "keyword": "body oil",
+          "count": 3
+        },
+        {
+          "keyword": "deodorant",
+          "count": 2
+        },
+        {
+          "keyword": "body wash",
+          "count": 2
+        }
+      ]
+    }
+  ],
+  "viral_products": [
+    {
+      "product": "Beauty of Joseon Glow Serum",
+      "category": "Skincare",
+      "price": "$17",
+      "units_sold_tiktok": "8,500+",
+      "why_viral": "Affordable K-beauty, targets hydration and uneven tone, dewy finish on camera"
+    },
+    {
+      "product": "Beauty of Joseon Rice Sunscreen SPF 50+",
+      "category": "Skincare",
+      "price": "$16",
+      "units_sold_tiktok": "10,000+",
+      "why_viral": "No white cast, dewy finish, rice water + prebiotic complex"
+    },
+    {
+      "product": "Medicube Collagen Night Wrapping Mask",
+      "category": "Skincare",
+      "price": "$28",
+      "units_sold_tiktok": "15,000+",
+      "why_viral": "Overnight transformation visible on camera, collagen-rich veil"
+    },
+    {
+      "product": "Medicube Pink Peptide PDRN Serum",
+      "category": "Skincare",
+      "price": "$32",
+      "units_sold_tiktok": "5,000+",
+      "why_viral": "PDRN is 2026's 'it' ingredient, accessible price point"
+    },
+    {
+      "product": "Paula's Choice 2% BHA Liquid Exfoliant",
+      "category": "Skincare",
+      "price": "$35",
+      "units_sold_tiktok": "20,000+",
+      "why_viral": "Pore-minimizing, consistent sell-out, dermatologist-backed"
+    },
+    {
+      "product": "Rhode Caffeine Reset Eye Cream",
+      "category": "Skincare",
+      "price": "$29",
+      "units_sold_tiktok": "Sold out at launch",
+      "why_viral": "Hailey Bieber brand, instant tightening effect visible on camera"
+    },
+    {
+      "product": "Magnetic Eyelash Dual-Pack System",
+      "category": "Makeup",
+      "price": "$32.99",
+      "units_sold_tiktok": "50,000+",
+      "why_viral": "78% reuse rate, hypoallergenic, easy before/after content"
+    },
+    {
+      "product": "M.ph Foundation (Mary Phillips)",
+      "category": "Makeup",
+      "price": "$48",
+      "units_sold_tiktok": "Sold out 3x",
+      "why_viral": "Celebrity makeup artist brand, silk-like application, wide shade range"
+    },
+    {
+      "product": "$5 Viral Lip Oils",
+      "category": "Makeup",
+      "price": "$5",
+      "units_sold_tiktok": "200,000+",
+      "why_viral": "Impulse price, glossy finish, shade comparison videos drive sales"
+    },
+    {
+      "product": "MaryRuth's Liquid Multivitamin + Hair Growth",
+      "category": "Health & Wellness",
+      "price": "$29.95",
+      "units_sold_tiktok": "500,000+",
+      "why_viral": "Morning routine staple, liquid form easy to demo, hair growth claims"
+    },
+    {
+      "product": "Smart Posture Corrector (Bluetooth)",
+      "category": "Tech & Gadgets",
+      "price": "$39.99",
+      "units_sold_tiktok": "217% YoY growth",
+      "why_viral": "Viral 'desk reset' challenge, ultra-thin design, vibration alert"
+    },
+    {
+      "product": "LED Galaxy Projector",
+      "category": "Tech & Gadgets",
+      "price": "$15",
+      "units_sold_tiktok": "10,000+ in 2 weeks",
+      "why_viral": "Stunning on camera, bedroom glow-up content, under $20"
+    },
+    {
+      "product": "UV-C Phone Sanitizer 3-in-1",
+      "category": "Tech & Gadgets",
+      "price": "$44.99",
+      "units_sold_tiktok": "$4.2M monthly gross sales",
+      "why_viral": "Morning routine + gym bag content, sanitize + charge + stand"
+    },
+    {
+      "product": "Press-On Nails Kits",
+      "category": "Makeup",
+      "price": "$8-$15",
+      "units_sold_tiktok": "100,000+",
+      "why_viral": "Salon-quality at home, under $15, easy application videos"
+    }
+  ],
+  "hashtag_pulse": [
+    {
+      "hashtag": "#TikTokMadeMeBuyIt",
+      "status": "Massive \u2014 billions of views, primary product discovery tag"
+    },
+    {
+      "hashtag": "#TikTokShopFinds",
+      "status": "Growing rapidly with TikTok Shop adoption"
+    },
+    {
+      "hashtag": "#TikTokShop",
+      "status": "Core shopping hashtag, used in all product content"
+    },
+    {
+      "hashtag": "#BeautyTok",
+      "status": "Dominant subcommunity, 65% of Gen Z beauty discovery"
+    },
+    {
+      "hashtag": "#SkinTok",
+      "status": "Active \u2014 K-beauty and ingredient-focused content"
+    },
+    {
+      "hashtag": "#CleanTok",
+      "status": "Thriving \u2014 cleaning transformations drive product sales"
+    },
+    {
+      "hashtag": "#PerfumeTok",
+      "status": "Rapidly growing \u2014 scent layering and dupe culture"
+    },
+    {
+      "hashtag": "#TechTok",
+      "status": "Active \u2014 gadget unboxing and reviews"
+    },
+    {
+      "hashtag": "#PetTok",
+      "status": "Strong niche community \u2014 pet reaction content"
+    },
+    {
+      "hashtag": "#FashionTok",
+      "status": "Active \u2014 OOTD and haul content, accessories trending"
+    }
+  ],
+  "top_brands": [
+    "Rhode",
+    "M.ph",
+    "Medicube",
+    "Beauty of Joseon",
+    "Paula's Choice",
+    "The Ordinary",
+    "Laneige",
+    "REFY",
+    "Merit",
+    "Tower 28",
+    "Charlotte Tilbury",
+    "Rare Beauty",
+    "Huda Beauty",
+    "MaryRuth's",
+    "Weleda",
+    "The INKEY List",
+    "Rimmel London",
+    "Maybelline",
+    "L'Oreal"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schedule": {
+    "frequency_days": 2,
+    "start_date": "2026-03-25",
+    "time_utc": "09:00",
+    "region": "US"
+  },
+  "scraper": {
+    "max_retries": 3,
+    "request_timeout_seconds": 15,
+    "delay_between_requests_seconds": 1.5,
+    "max_sources": 10
+  },
+  "reports": {
+    "formats": ["markdown", "json", "csv"],
+    "top_n_products": 10,
+    "archive_after_days": 14
+  },
+  "sources": {
+    "trend_pages": true,
+    "creative_center": true,
+    "hashtag_insights": true
+  }
+}
