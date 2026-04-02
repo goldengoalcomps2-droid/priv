@@ -1,0 +1,8 @@
+# YouTube Bot — Watch, Like, and Read Comments
+# This script watches videos, likes each one, and reads comments.
+
+visit www.youtube.com
+search mind and motivation
+click_channel
+go_to_videos
+watch 10 duration=1m30s like comments

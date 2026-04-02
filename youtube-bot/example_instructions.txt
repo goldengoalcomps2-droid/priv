@@ -1,0 +1,15 @@
+# YouTube Bot — Example Instruction Script
+# Lines starting with # are comments and are ignored.
+#
+# This script demonstrates the exact use case:
+# 1. Go to YouTube
+# 2. Search for "mind and motivation"
+# 3. Click on the channel
+# 4. Go to the Videos tab
+# 5. Watch 20 videos for 1 minute 30 seconds each (skipping ads)
+
+visit www.youtube.com
+search mind and motivation
+click_channel
+go_to_videos
+watch 20 duration=1m30s
