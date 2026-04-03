@@ -17,8 +17,8 @@ NAVIGATION_TIMEOUT = 30000  # ms
 
 # Selectors (YouTube DOM selectors)
 SELECTORS = {
-    "search_input": 'input#search',
-    "search_button": 'button#search-icon-legacy',
+    "search_input": 'input#search, input[name="search_query"], ytd-searchbox input',
+    "search_button": 'button#search-icon-legacy, #search-icon-legacy',
     "video_thumbnail": 'ytd-video-renderer a#video-title',
     "channel_link": 'ytd-channel-renderer a.channel-link',
     "channel_name_search": 'ytd-channel-renderer #channel-title',
@@ -34,6 +34,6 @@ SELECTORS = {
     "comment_author": '#author-text',
     "mute_button": 'button.ytp-mute-button',
     "play_button": 'button.ytp-play-button',
-    "cookie_accept": 'button[aria-label="Accept all"], button[aria-label="Accept the use of cookies and other data for the purposes described"]',
-    "dismiss_signin": 'button[aria-label="No thanks"], tp-yt-paper-button#button.style-scope.yt-button-renderer[aria-label="No thanks"]',
+    "cookie_accept": 'button[aria-label="Accept all"], button[aria-label="Accept the use of cookies and other data for the purposes described"], [aria-label="Reject all"], form[action*="consent"] button',
+    "dismiss_signin": 'button[aria-label="No thanks"], tp-yt-paper-button[aria-label="No thanks"], button.yt-spec-button-shape-next[aria-label="No thanks"], #dismiss-button, .style-scope.yt-button-renderer[aria-label="Dismiss"]',
 }

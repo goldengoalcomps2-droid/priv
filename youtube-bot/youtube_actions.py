@@ -19,14 +19,32 @@ class YouTubeBot:
     # ── Helpers ──────────────────────────────────────────────────────────
 
     async def _dismiss_popups(self):
-        """Dismiss cookie banners and sign-in prompts."""
-        for sel in [SELECTORS["cookie_accept"], SELECTORS["dismiss_signin"]]:
-            try:
-                if await self.engine.exists(sel, timeout=2000):
-                    await self.engine.click(sel)
-                    await asyncio.sleep(1)
-            except Exception:
-                pass
+        """Dismiss cookie banners, sign-in prompts, and other overlays."""
+        # Try multiple rounds — YouTube can layer popups
+        for _ in range(3):
+            dismissed = False
+            for sel in [SELECTORS["cookie_accept"], SELECTORS["dismiss_signin"]]:
+                try:
+                    if await self.engine.exists(sel, timeout=2000):
+                        await self.engine.click(sel)
+                        await asyncio.sleep(1.5)
+                        dismissed = True
+                except Exception:
+                    pass
+
+            # Also try clicking any "No thanks" or "Dismiss" text buttons
+            for text in ["No thanks", "Dismiss", "Not now", "Skip trial"]:
+                try:
+                    btn = await self.engine.page.query_selector(f'button:has-text("{text}")')
+                    if btn and await btn.is_visible():
+                        await btn.click()
+                        await asyncio.sleep(1)
+                        dismissed = True
+                except Exception:
+                    pass
+
+            if not dismissed:
+                break
 
     async def _skip_ad(self) -> bool:
         """Attempt to skip a YouTube ad. Returns True if an ad was handled."""
@@ -88,16 +106,47 @@ class YouTubeBot:
     async def go_to_youtube(self):
         """Navigate to YouTube."""
         await self.engine.navigate("https://www.youtube.com")
+        await asyncio.sleep(3)
+        await self._dismiss_popups()
+        # Wait for the page to be interactive
+        await asyncio.sleep(2)
         await self._dismiss_popups()
         print("[YouTube] Opened YouTube")
 
     async def search(self, query: str):
         """Type a query into the YouTube search bar and submit."""
         print(f"[YouTube] Searching for: {query}")
-        await self.engine.type_text(SELECTORS["search_input"], query)
+        await self._dismiss_popups()
+
+        # Try multiple selector strategies for the search input
+        search_typed = False
+        for selector in ['input#search', 'input[name="search_query"]', 'ytd-searchbox input', '#search-input input']:
+            try:
+                await self.engine.page.wait_for_selector(selector, timeout=5000, state="visible")
+                await self.engine.page.click(selector)
+                await self.engine.page.fill(selector, "")
+                await self.engine.page.type(selector, query, delay=50)
+                search_typed = True
+                break
+            except Exception:
+                continue
+
+        if not search_typed:
+            # Last resort: click the search icon area to focus, then type
+            print("[YouTube] Trying keyboard shortcut to focus search...")
+            await self.engine.page.keyboard.press("/")
+            await asyncio.sleep(1)
+            await self.engine.page.keyboard.type(query, delay=50)
+
         await asyncio.sleep(0.5)
-        await self.engine.click(SELECTORS["search_button"])
-        await asyncio.sleep(3)
+
+        # Submit the search
+        try:
+            await self.engine.page.keyboard.press("Enter")
+        except Exception:
+            await self.engine.click(SELECTORS["search_button"])
+
+        await asyncio.sleep(4)
         await self._dismiss_popups()
         print(f"[YouTube] Search results loaded for: {query}")
 
