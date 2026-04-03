@@ -12,7 +12,10 @@ from typing import Optional
 from .data import Competition, MatchContext, TeamSeason, HalfStats, TeamForm, PlayerInfo
 from .predictor import FootballPredictor
 from .sample_data import get_sample_teams
-from .scraper import build_team_season_from_api, fetch_standings, COMPETITION_IDS
+from .scraper import (
+    build_team_season_from_api, fetch_standings, load_all_leagues,
+    enrich_team_with_matches, enrich_league_with_scorers, COMPETITION_IDS,
+)
 
 
 BANNER = r"""
@@ -52,8 +55,11 @@ TEAM INFO:
   team <name>                 Show team stats
   teams                       List all available teams
 
-GENERAL:
+DATA:
+  refresh                     Re-fetch all league data from API
   add team                    Add/update a team manually
+
+GENERAL:
   help                        Show this help
   quit / exit                 Exit the bot
 ─────────────────────────────────────────────────────────────
@@ -67,14 +73,32 @@ class FootballCLI:
         self.current_match: Optional[MatchContext] = None
         self.api_key = os.environ.get("FOOTBALL_DATA_API_KEY", "")
 
+    def _load_live_data(self):
+        """Fetch live data from football-data.org for all supported leagues."""
+        print("\n  Fetching live 2025/26 season data from football-data.org...")
+        print("  (This takes ~1 min due to API rate limits)\n")
+        try:
+            live_teams = load_all_leagues(self.api_key, fetch_matches=False)
+            if live_teams:
+                self.teams.update(live_teams)
+                print(f"\n  ✅ Loaded {len(live_teams)} teams with live data!")
+                print("  Tip: When you set a match, detailed stats (form, half goals) are fetched automatically.\n")
+            else:
+                print("  ⚠️  No data returned — using fallback data.\n")
+        except Exception as e:
+            print(f"  ⚠️  Failed to fetch live data: {e}")
+            print("  Using fallback data instead.\n")
+
     def run(self):
         print(BANNER)
 
         if self.api_key:
-            print("  [API key found — live data available]")
+            print("  [API key found — fetching live 2025/26 data]")
+            self._load_live_data()
         else:
-            print("  [No API key — using built-in data]")
-            print("  [Set FOOTBALL_DATA_API_KEY for live stats from football-data.org]")
+            print("  [No API key — using built-in fallback data]")
+            print("  [For LIVE data, get a FREE key at: https://www.football-data.org/client/register]")
+            print("  [Then: export FOOTBALL_DATA_API_KEY=your_key_here]")
         print()
 
         while True:
@@ -104,12 +128,21 @@ class FootballCLI:
                 self._enter_live_mode()
             elif cmd.startswith("update live"):
                 self._update_live()
+            elif cmd == "refresh":
+                self._refresh_data()
             elif cmd == "add team":
                 self._add_team_interactive()
             elif self.current_match:
                 self._handle_prediction(cmd, raw)
             else:
                 print("  No match set. Use 'match <home> vs <away>' first, or type 'help'.")
+
+    def _refresh_data(self):
+        if not self.api_key:
+            print("  No API key set. Get one free at: https://www.football-data.org/client/register")
+            print("  Then: export FOOTBALL_DATA_API_KEY=your_key_here")
+            return
+        self._load_live_data()
 
     def _list_teams(self):
         print("\n  Available teams:")
@@ -214,6 +247,18 @@ class FootballCLI:
             is_cup = True
             print(f"  Cross-league match — treating as {competition.value}")
 
+        # Auto-enrich with match-level data if API available and form is empty
+        if self.api_key:
+            for team in [home, away]:
+                if not team.form.results:
+                    print(f"  Fetching detailed stats for {team.name}...")
+                    # Find team ID from standings cache
+                    standings = fetch_standings(team.competition, self.api_key)
+                    for sname, sdata in standings.items():
+                        if sname == team.name and "id" in sdata:
+                            enrich_team_with_matches(team, self.api_key, sdata["id"])
+                            break
+
         self.current_match = MatchContext(
             home_team=home,
             away_team=away,
@@ -225,6 +270,10 @@ class FootballCLI:
 
         print(f"\n  ✅ Match set: {home.name} vs {away.name}")
         print(f"  Competition: {competition.value}")
+        if home.form.results:
+            print(f"  {home.name} form: {' '.join(home.form.results[-6:])}")
+        if away.form.results:
+            print(f"  {away.name} form: {' '.join(away.form.results[-6:])}")
         print(f"  Ready for predictions — type a question or 'analysis' for full breakdown.\n")
 
     def _enter_live_mode(self):
