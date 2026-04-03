@@ -1,6 +1,7 @@
 """Core browser automation engine using Playwright."""
 
 import asyncio
+import os
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 from config import BROWSER_TYPE, HEADLESS, SLOW_MO, PAGE_LOAD_TIMEOUT, NAVIGATION_TIMEOUT
 
@@ -8,9 +9,10 @@ from config import BROWSER_TYPE, HEADLESS, SLOW_MO, PAGE_LOAD_TIMEOUT, NAVIGATIO
 class BrowserEngine:
     """Manages the browser lifecycle and provides low-level browser controls."""
 
-    def __init__(self, browser_type=None, headless=None):
+    def __init__(self, browser_type=None, headless=None, executable_path=None):
         self.browser_type = browser_type or BROWSER_TYPE
         self.headless = headless if headless is not None else HEADLESS
+        self.executable_path = executable_path
         self._playwright = None
         self._browser: Browser | None = None
         self._context: BrowserContext | None = None
@@ -21,15 +23,24 @@ class BrowserEngine:
         self._playwright = await async_playwright().start()
 
         launcher = getattr(self._playwright, self.browser_type)
-        self._browser = await launcher.launch(
-            headless=self.headless,
-            slow_mo=SLOW_MO,
-            args=[
+
+        launch_kwargs = {
+            "headless": self.headless,
+            "slow_mo": SLOW_MO,
+        }
+
+        if self.browser_type == "chromium":
+            launch_kwargs["args"] = [
                 "--disable-blink-features=AutomationControlled",
                 "--disable-infobars",
                 "--start-maximized",
-            ] if self.browser_type == "chromium" else [],
-        )
+                "--no-sandbox",
+            ]
+
+        if self.executable_path:
+            launch_kwargs["executable_path"] = self.executable_path
+
+        self._browser = await launcher.launch(**launch_kwargs)
 
         self._context = await self._browser.new_context(
             viewport={"width": 1920, "height": 1080},
