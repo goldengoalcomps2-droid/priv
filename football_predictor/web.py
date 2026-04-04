@@ -70,14 +70,29 @@ def handle_message(text: str) -> str:
         return (
             "<b>Set up a match:</b><br>"
             "Type: <code>Liverpool vs Arsenal</code><br><br>"
-            "<b>Then ask predictions:</b><br>"
-            "• <code>first half goal?</code><br>"
-            "• <code>second half goal?</code><br>"
-            "• <code>btts</code> (both teams to score)<br>"
-            "• <code>over 2.5</code> / <code>over 1.5</code> / <code>over 3.5</code><br>"
-            "• <code>result</code> (who wins?)<br>"
+            "<b>Pre-match predictions:</b><br>"
+            "• <code>result</code> — who wins?<br>"
+            "• <code>scoreline</code> — predicted score<br>"
+            "• <code>btts</code> — both teams to score<br>"
+            "• <code>over 2.5</code> / <code>over 1.5</code> / <code>over 3.5</code> — total goals<br>"
+            "• <code>over 1.5 first half</code> — 1st half goals<br>"
+            "• <code>over 2.5 first half</code> — 1st half goals<br>"
+            "• <code>over 1.5 second half</code> — 2nd half goals<br>"
+            "• <code>over 2.5 second half</code> — 2nd half goals<br>"
+            "• <code>corners</code> — over 9.5 corners<br>"
+            "• <code>over 10.5 corners</code> — custom corner line<br>"
+            "• <code>first half goal?</code> — goal in 1st half<br>"
+            "• <code>second half goal?</code> — goal in 2nd half<br>"
             "• <code>clean sheet Liverpool</code><br>"
-            "• <code>analysis</code> (full breakdown)<br><br>"
+            "• <code>analysis</code> — full breakdown with H2H<br><br>"
+            "<b>Live mode:</b><br>"
+            "• <code>live 45 1-0 55% 4sot 2sot 5cor 3cor</code><br>"
+            "• <code>next goal</code> — who scores next?<br><br>"
+            "<b>Lineups:</b><br>"
+            "• <code>lineup home Salah, Van Dijk, Mac Allister</code><br>"
+            "• <code>lineup away Saka, Rice, Havertz</code><br><br>"
+            "<b>Head-to-head:</b><br>"
+            "• <code>h2h 3W 1D 1L 2-1 0-0 3-2</code><br><br>"
             "<b>Other:</b><br>"
             "• <code>teams</code> — list all teams<br>"
             "• <code>team Liverpool</code> — show team stats<br>"
@@ -185,7 +200,15 @@ def handle_message(text: str) -> str:
         result += "<br>Now ask me anything! Try: <code>result</code>, <code>btts</code>, <code>over 2.5</code>, <code>first half goal?</code>"
         return result
 
-    # Live match update: "live 45 0-0 55% 3sot 2sot"
+    # Lineup input: "lineup home Salah, Van Dijk, Rice" or "lineup away Saka, Havertz"
+    if cmd.startswith("lineup ") and current_match:
+        return handle_lineup(text[7:].strip())
+
+    # Head-to-head input: "h2h 3W 1D 1L 2-1 0-0 3-2"
+    if cmd.startswith("h2h ") and current_match:
+        return handle_h2h(text[4:].strip())
+
+    # Live match update: "live 45 0-0 55% 3sot 2sot 5cor 3cor"
     if cmd.startswith("live ") and current_match:
         return handle_live_update(text[5:].strip())
 
@@ -201,6 +224,22 @@ def handle_message(text: str) -> str:
         pred = predictor.predict_second_half_goal(ctx)
     elif cmd in ("btts", "both teams to score", "both teams score"):
         pred = predictor.predict_btts(ctx)
+    elif cmd in ("scoreline", "score", "predicted score", "predict score", "exact score"):
+        pred = predictor.predict_scoreline(ctx)
+    elif "over" in cmd and ("corner" in cmd):
+        match = re.search(r'over\s+(\d+\.?\d*)', cmd)
+        line = float(match.group(1)) if match else 9.5
+        pred = predictor.predict_corners(ctx, line)
+    elif cmd in ("corners", "corner", "over 9.5 corners"):
+        pred = predictor.predict_corners(ctx, 9.5)
+    elif "over" in cmd and ("first half" in cmd or "1st half" in cmd or "fh" in cmd):
+        match = re.search(r'over\s+(\d+\.?\d*)', cmd)
+        line = float(match.group(1)) if match else 1.5
+        pred = predictor.predict_over_under_half(ctx, 1, line)
+    elif "over" in cmd and ("second half" in cmd or "2nd half" in cmd or "sh" in cmd):
+        match = re.search(r'over\s+(\d+\.?\d*)', cmd)
+        line = float(match.group(1)) if match else 1.5
+        pred = predictor.predict_over_under_half(ctx, 2, line)
     elif "over" in cmd:
         match = re.search(r'over\s+(\d+\.?\d*)', cmd)
         line = float(match.group(1)) if match else 2.5
@@ -225,6 +264,108 @@ def handle_message(text: str) -> str:
         return "I didn't understand that. Try: <code>result</code>, <code>btts</code>, <code>over 2.5</code>, <code>first half goal?</code>, or <code>help</code>"
 
     return format_prediction_html(pred)
+
+
+def handle_lineup(text: str) -> str:
+    """Parse: 'home Salah, Van Dijk, Rice' or 'away Saka, Havertz'"""
+    global current_match
+    if not current_match:
+        return "Set up a match first."
+
+    parts = text.split(None, 1)
+    if len(parts) < 2:
+        return "Format: <code>lineup home Player1, Player2, ...</code>"
+
+    side = parts[0].lower()
+    names = [n.strip() for n in parts[1].split(",") if n.strip()]
+
+    if side == "home":
+        team = current_match.home_team
+    elif side == "away":
+        team = current_match.away_team
+    else:
+        return "Use <code>lineup home ...</code> or <code>lineup away ...</code>"
+
+    from .data import PlayerInfo
+    lineup = []
+    for name in names:
+        # Check if player exists in squad
+        existing = [p for p in team.players if name.lower() in p.name.lower()]
+        if existing:
+            lineup.append(existing[0])
+        else:
+            lineup.append(PlayerInfo(name=name, position="?", rating=6.5))
+
+    team.lineup = lineup
+    player_list = ", ".join(p.name for p in lineup)
+    return f"<b>✅ {team.name} lineup set:</b><br>{player_list}"
+
+
+def handle_h2h(text: str) -> str:
+    """Parse: '3W 1D 1L 2-1 0-0 3-2' — W/D/L record then recent scores."""
+    global current_match
+    if not current_match:
+        return "Set up a match first."
+
+    from .data import HeadToHead
+    parts = text.upper().split()
+    wins = draws = losses = 0
+    scores = []
+    results = []
+
+    for p in parts:
+        p_orig = p
+        p = p.strip()
+        if p.endswith("W"):
+            try:
+                wins = int(p[:-1])
+                results += ["W"] * wins
+            except ValueError:
+                pass
+        elif p.endswith("D"):
+            try:
+                draws = int(p[:-1])
+                results += ["D"] * draws
+            except ValueError:
+                pass
+        elif p.endswith("L"):
+            try:
+                losses = int(p[:-1])
+                results += ["L"] * losses
+            except ValueError:
+                pass
+        elif "-" in p and p[0].isdigit():
+            scores.append(p_orig.lower())
+
+    total = wins + draws + losses
+    if total == 0:
+        return "Format: <code>h2h 3W 1D 1L 2-1 0-0 3-2</code>"
+
+    # Calculate goals from scores
+    total_scored = 0
+    total_conceded = 0
+    for s in scores:
+        try:
+            hg, ag = s.split("-")
+            total_scored += int(hg)
+            total_conceded += int(ag)
+        except ValueError:
+            pass
+
+    h2h = HeadToHead(
+        opponent=current_match.away_team.name,
+        games=total, wins=wins, draws=draws, losses=losses,
+        goals_scored=total_scored, goals_conceded=total_conceded,
+        last_results=results, last_scores=scores,
+    )
+    current_match.home_team.head_to_head[current_match.away_team.name] = h2h
+
+    return (
+        f"<b>✅ H2H set: {current_match.home_team.name} vs {current_match.away_team.name}</b><br>"
+        f"Record: {wins}W {draws}D {losses}L ({total} games)<br>"
+        f"Recent scores: {', '.join(scores) if scores else 'none entered'}<br>"
+        f"Avg goals/game: {h2h.avg_goals_per_game:.1f}"
+    )
 
 
 def handle_live_update(text: str) -> str:
@@ -262,19 +403,51 @@ def handle_live_update(text: str) -> str:
         if len(parts) > 4 and "sot" in parts[4]:
             current_match.away_shots_on_target = int(parts[4].replace("sot", ""))
 
-        if len(parts) > 5 and "red" in parts[5]:
-            current_match.home_red_cards = int(parts[5].replace("red", ""))
-        if len(parts) > 6 and "red" in parts[6]:
-            current_match.away_red_cards = int(parts[6].replace("red", ""))
+        sot_count = cor_count = red_count = 0
+        for part in parts[3:]:
+            pl = part.lower()
+            if pl.endswith("sot"):
+                val = int(pl.replace("sot", ""))
+                if sot_count == 0:
+                    current_match.home_shots_on_target = val
+                else:
+                    current_match.away_shots_on_target = val
+                sot_count += 1
+            elif pl.endswith("cor"):
+                val = int(pl.replace("cor", ""))
+                if cor_count == 0:
+                    current_match.home_corners = val
+                else:
+                    current_match.away_corners = val
+                cor_count += 1
+            elif pl.endswith("red"):
+                val = int(pl.replace("red", ""))
+                if red_count == 0:
+                    current_match.home_red_cards = val
+                else:
+                    current_match.away_red_cards = val
+                red_count += 1
+
+        # Track first-half goals if at or past halftime
+        if current_match.current_minute >= 45:
+            if current_match.home_first_half_goals == 0 and current_match.away_first_half_goals == 0:
+                # First update at HT — assume current goals are FH goals
+                current_match.home_first_half_goals = current_match.home_goals
+                current_match.away_first_half_goals = current_match.away_goals
 
         ctx = current_match
-        return (
+        result = (
             f"<b>🔴 LIVE: {ctx.home_team.name} {ctx.home_goals}-{ctx.away_goals} "
             f"{ctx.away_team.name} ({ctx.current_minute}')</b><br>"
             f"Possession: {ctx.home_possession:.0f}%-{ctx.away_possession:.0f}%<br>"
             f"Shots on target: {ctx.home_shots_on_target}-{ctx.away_shots_on_target}<br>"
-            f"<br>Now ask predictions based on current match state!"
         )
+        if ctx.home_corners > 0 or ctx.away_corners > 0:
+            result += f"Corners: {ctx.home_corners}-{ctx.away_corners} (total: {ctx.total_corners})<br>"
+        if ctx.home_red_cards > 0 or ctx.away_red_cards > 0:
+            result += f"Red cards: {ctx.home_red_cards}-{ctx.away_red_cards}<br>"
+        result += "<br>Now ask predictions based on current match state!"
+        return result
     except (ValueError, IndexError):
         return "Invalid format. Try: <code>live 45 1-0 55%</code>"
 
@@ -513,21 +686,44 @@ function promptLive() {
     const poss = prompt('Home possession % (e.g. 55):') || '50';
     const hsot = prompt('Home shots on target:') || '0';
     const asot = prompt('Away shots on target:') || '0';
-    send(`live ${min} ${score} ${poss}% ${hsot}sot ${asot}sot`);
+    const hcor = prompt('Home corners:') || '0';
+    const acor = prompt('Away corners:') || '0';
+    let cmd = `live ${min} ${score} ${poss}%`;
+    if (hsot !== '0' || asot !== '0') cmd += ` ${hsot}sot ${asot}sot`;
+    if (hcor !== '0' || acor !== '0') cmd += ` ${hcor}cor ${acor}cor`;
+    send(cmd);
 }
 
 function updateQuickButtons() {
     quickBtns.innerHTML = `
         <button class="quick-btn" onclick="send('result')">Result</button>
+        <button class="quick-btn" onclick="send('scoreline')">Scoreline</button>
         <button class="quick-btn" onclick="send('btts')">BTTS</button>
         <button class="quick-btn" onclick="send('over 2.5')">Over 2.5</button>
         <button class="quick-btn" onclick="send('over 1.5')">Over 1.5</button>
+        <button class="quick-btn" onclick="send('over 1.5 first half')">O1.5 FH</button>
+        <button class="quick-btn" onclick="send('over 2.5 first half')">O2.5 FH</button>
+        <button class="quick-btn" onclick="send('over 1.5 second half')">O1.5 SH</button>
+        <button class="quick-btn" onclick="send('over 2.5 second half')">O2.5 SH</button>
+        <button class="quick-btn" onclick="send('corners')">Corners 9.5</button>
         <button class="quick-btn" onclick="send('first half goal?')">1H Goal?</button>
         <button class="quick-btn" onclick="send('second half goal?')">2H Goal?</button>
-        <button class="quick-btn" onclick="send('analysis')">Full Analysis</button>
+        <button class="quick-btn" onclick="send('analysis')">Analysis</button>
+        <button class="quick-btn" onclick="promptH2H()">📊 Add H2H</button>
+        <button class="quick-btn" onclick="promptLineup('home')">📋 Home Lineup</button>
+        <button class="quick-btn" onclick="promptLineup('away')">📋 Away Lineup</button>
         <button class="quick-btn" onclick="promptLive()">🔴 Go Live</button>
-        <button class="quick-btn" onclick="send('teams')">Teams</button>
     `;
+}
+
+function promptH2H() {
+    const data = prompt('Head-to-head record (home team perspective)\\nFormat: 3W 1D 1L 2-1 0-0 3-2\\n(wins draws losses then recent scores)');
+    if (data) send('h2h ' + data);
+}
+
+function promptLineup(side) {
+    const names = prompt(side.charAt(0).toUpperCase() + side.slice(1) + ' team lineup:\\nEnter player names separated by commas');
+    if (names) send('lineup ' + side + ' ' + names);
 }
 </script>
 </body>

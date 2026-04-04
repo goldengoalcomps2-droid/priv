@@ -132,6 +132,28 @@ class PlayerInfo:
 
 
 @dataclass
+class HeadToHead:
+    """Historical record between two teams."""
+    opponent: str = ""
+    games: int = 0
+    wins: int = 0
+    draws: int = 0
+    losses: int = 0
+    goals_scored: int = 0
+    goals_conceded: int = 0
+    last_results: list[str] = field(default_factory=list)  # W/D/L most recent first
+    last_scores: list[str] = field(default_factory=list)  # "2-1", "0-0" etc
+
+    @property
+    def avg_goals_per_game(self) -> float:
+        return (self.goals_scored + self.goals_conceded) / self.games if self.games > 0 else 0
+
+    @property
+    def win_pct(self) -> float:
+        return (self.wins / self.games * 100) if self.games > 0 else 0
+
+
+@dataclass
 class TeamSeason:
     """Full season data for a team."""
     name: str
@@ -152,6 +174,10 @@ class TeamSeason:
     clean_sheets: int = 0
     failed_to_score: int = 0
 
+    # Corner stats
+    corners_per_game: float = 5.0
+    corners_conceded_per_game: float = 5.0
+
     # Half-by-half breakdown
     half_stats: HalfStats = field(default_factory=HalfStats)
 
@@ -164,8 +190,14 @@ class TeamSeason:
     # Squad
     players: list[PlayerInfo] = field(default_factory=list)
 
+    # Starting lineup for current/upcoming match
+    lineup: list[PlayerInfo] = field(default_factory=list)
+
     # Fixture congestion
     recent_match_dates: list[date] = field(default_factory=list)
+
+    # Head-to-head records vs specific opponents
+    head_to_head: dict[str, HeadToHead] = field(default_factory=dict)
 
     # Home/Away splits
     home_wins: int = 0
@@ -178,6 +210,13 @@ class TeamSeason:
     away_losses: int = 0
     away_goals_scored: int = 0
     away_goals_conceded: int = 0
+
+    # Games with over X.5 goals in first half
+    games_over_1_5_fh: int = 0
+    games_over_2_5_fh: int = 0
+    # Games with over X.5 goals in second half
+    games_over_1_5_sh: int = 0
+    games_over_2_5_sh: int = 0
 
     @property
     def goal_difference(self) -> int:
@@ -289,10 +328,24 @@ class MatchContext:
     away_shots_on_target: int = 0
     home_xg: float = 0.0
     away_xg: float = 0.0
+    home_corners: int = 0
+    away_corners: int = 0
+    home_fouls: int = 0
+    away_fouls: int = 0
+    # First-half goals (for live half-specific predictions)
+    home_first_half_goals: int = 0
+    away_first_half_goals: int = 0
+    # Lineups
+    home_lineup: list[str] = field(default_factory=list)
+    away_lineup: list[str] = field(default_factory=list)
 
     @property
     def is_halftime(self) -> bool:
         return 45 <= self.current_minute <= 46 and self.is_live
+
+    @property
+    def is_second_half(self) -> bool:
+        return self.current_minute >= 46 and self.is_live
 
     @property
     def scoreline(self) -> str:
@@ -301,3 +354,11 @@ class MatchContext:
     @property
     def total_goals(self) -> int:
         return self.home_goals + self.away_goals
+
+    @property
+    def total_corners(self) -> int:
+        return self.home_corners + self.away_corners
+
+    @property
+    def second_half_goals(self) -> int:
+        return self.total_goals - self.home_first_half_goals - self.away_first_half_goals

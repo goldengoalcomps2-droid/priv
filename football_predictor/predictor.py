@@ -466,6 +466,235 @@ class FootballPredictor:
 
         return self._build_prediction("Who scores next?", max(home_prob, away_prob), reasons)
 
+    def predict_scoreline(self, ctx: MatchContext) -> Prediction:
+        """Predict most likely scoreline."""
+        reasons = []
+        home = ctx.home_team
+        away = ctx.away_team
+
+        # Expected goals for each team
+        h_attack = home.goals_per_game
+        a_defence = away.goals_conceded_per_game
+        a_attack = away.goals_per_game
+        h_defence = home.goals_conceded_per_game
+
+        exp_home = (h_attack + a_defence) / 2
+        exp_away = (a_attack + h_defence) / 2
+
+        # Home advantage bump
+        exp_home *= 1.1
+        exp_away *= 0.9
+
+        # Form adjustment
+        if home.form.form_rating > 70:
+            exp_home *= 1.05
+        if away.form.form_rating > 70:
+            exp_away *= 1.05
+        if home.form.form_rating < 35:
+            exp_home *= 0.9
+        if away.form.form_rating < 35:
+            exp_away *= 0.9
+
+        # Head-to-head adjustment
+        h2h = home.head_to_head.get(away.name)
+        if h2h and h2h.games >= 3:
+            h2h_avg = h2h.avg_goals_per_game
+            reasons.append(f"H2H: {h2h.wins}W {h2h.draws}D {h2h.losses}L in last {h2h.games} meetings")
+            if h2h.last_scores:
+                reasons.append(f"Recent scores: {', '.join(h2h.last_scores[:5])}")
+
+        # Round to nearest likely scoreline
+        h_goals = round(exp_home)
+        a_goals = round(exp_away)
+
+        # Generate top 5 scorelines with rough probabilities using Poisson-like logic
+        import math
+        def poisson_prob(lam: float, k: int) -> float:
+            return (lam ** k) * math.exp(-lam) / math.factorial(k)
+
+        scorelines = []
+        for hg in range(5):
+            for ag in range(5):
+                p = poisson_prob(exp_home, hg) * poisson_prob(exp_away, ag) * 100
+                scorelines.append((hg, ag, p))
+
+        scorelines.sort(key=lambda x: -x[2])
+        top5 = scorelines[:5]
+
+        reasons.append(f"Expected goals: {home.name} {exp_home:.2f}, {away.name} {exp_away:.2f}")
+        answer_parts = []
+        for hg, ag, p in top5:
+            answer_parts.append(f"{hg}-{ag} ({p:.1f}%)")
+
+        answer = " | ".join(answer_parts)
+        best = top5[0]
+        prob = best[2]
+
+        reasons.append(f"Most likely: {best[0]}-{best[1]}")
+
+        return self._build_prediction(
+            f"Predicted scoreline: {home.name} vs {away.name}",
+            prob, reasons
+        )
+
+    def predict_over_under_half(self, ctx: MatchContext, half: int, line: float) -> Prediction:
+        """Over/under for a specific half. half=1 for first, half=2 for second."""
+        reasons = []
+        home = ctx.home_team
+        away = ctx.away_team
+        games_h = max(home.games_played, 1)
+        games_a = max(away.games_played, 1)
+
+        half_name = "1st half" if half == 1 else "2nd half"
+
+        if half == 1:
+            h_scored = home.half_stats.avg_first_half_scored(games_h)
+            h_conceded = home.half_stats.avg_first_half_conceded(games_h)
+            a_scored = away.half_stats.avg_first_half_scored(games_a)
+            a_conceded = away.half_stats.avg_first_half_conceded(games_a)
+        else:
+            h_scored = home.half_stats.avg_second_half_scored(games_h)
+            h_conceded = home.half_stats.avg_second_half_conceded(games_h)
+            a_scored = away.half_stats.avg_second_half_scored(games_a)
+            a_conceded = away.half_stats.avg_second_half_conceded(games_a)
+
+        expected_half_goals = (h_scored + a_scored + h_conceded + a_conceded) / 2
+        reasons.append(f"Expected {half_name} goals: {expected_half_goals:.2f}")
+
+        prob = 50.0
+        if expected_half_goals > line + 0.5:
+            prob += 20
+            reasons.append(f"Expected goals well above {line} line")
+        elif expected_half_goals > line:
+            prob += 10
+            reasons.append(f"Expected goals above {line} line")
+        elif expected_half_goals < line - 0.3:
+            prob -= 15
+            reasons.append(f"Expected goals below {line} line")
+
+        # Historical over rates
+        if half == 1:
+            if line == 1.5 and home.games_over_1_5_fh > 0:
+                rate = home.games_over_1_5_fh / games_h * 100
+                prob += (rate - 50) * 0.2
+                reasons.append(f"{home.name}: over 1.5 FH in {rate:.0f}% of games")
+            if line == 2.5 and home.games_over_2_5_fh > 0:
+                rate = home.games_over_2_5_fh / games_h * 100
+                prob += (rate - 30) * 0.2
+                reasons.append(f"{home.name}: over 2.5 FH in {rate:.0f}% of games")
+        else:
+            if line == 1.5 and home.games_over_1_5_sh > 0:
+                rate = home.games_over_1_5_sh / games_h * 100
+                prob += (rate - 50) * 0.2
+                reasons.append(f"{home.name}: over 1.5 SH in {rate:.0f}% of games")
+            if line == 2.5 and home.games_over_2_5_sh > 0:
+                rate = home.games_over_2_5_sh / games_h * 100
+                prob += (rate - 30) * 0.2
+                reasons.append(f"{home.name}: over 2.5 SH in {rate:.0f}% of games")
+
+        # Form boost
+        combined_gpg = home.goals_per_game + away.goals_per_game
+        if combined_gpg > 3.5:
+            prob += 8
+            reasons.append(f"High-scoring matchup ({combined_gpg:.2f} total goals/game)")
+
+        # Defensive weakness
+        if home.goals_conceded_per_game > 1.5 or away.goals_conceded_per_game > 1.5:
+            prob += 5
+            reasons.append("At least one defence is leaky")
+
+        # Live adjustments
+        if ctx.is_live:
+            if half == 1 and ctx.current_minute < 45:
+                fh_goals = ctx.home_first_half_goals + ctx.away_first_half_goals
+                if fh_goals > line:
+                    prob = 98
+                    reasons.append(f"Already over {line} in {half_name}")
+                else:
+                    remaining = 45 - ctx.current_minute
+                    rate_per_min = expected_half_goals / 45
+                    projected = fh_goals + rate_per_min * remaining
+                    if projected > line + 0.5:
+                        prob += 12
+                    reasons.append(f"Current: {fh_goals} goals, ~{remaining} mins left in half")
+            elif half == 2 and ctx.current_minute >= 45:
+                sh_goals = ctx.second_half_goals
+                if sh_goals > line:
+                    prob = 98
+                    reasons.append(f"Already over {line} in {half_name}")
+                else:
+                    remaining = 90 - ctx.current_minute
+                    rate_per_min = expected_half_goals / 45
+                    projected = sh_goals + rate_per_min * remaining
+                    reasons.append(f"Current 2H goals: {sh_goals}, ~{remaining} mins left")
+
+        prob = max(3, min(97, prob))
+        return self._build_prediction(f"Over {line} goals in {half_name}?", prob, reasons)
+
+    def predict_corners(self, ctx: MatchContext, line: float = 9.5) -> Prediction:
+        """Predict over/under corners."""
+        reasons = []
+        home = ctx.home_team
+        away = ctx.away_team
+
+        expected_corners = (
+            home.corners_per_game + away.corners_per_game +
+            home.corners_conceded_per_game + away.corners_conceded_per_game
+        ) / 2
+        reasons.append(f"Expected total corners: {expected_corners:.1f}")
+
+        prob = 50.0
+        if expected_corners > line + 1:
+            prob += 20
+            reasons.append(f"Well above {line} line")
+        elif expected_corners > line:
+            prob += 10
+            reasons.append(f"Above {line} line")
+        elif expected_corners < line - 1:
+            prob -= 15
+            reasons.append(f"Below {line} line")
+
+        # Possession-dominant teams force more corners
+        if home.possession_avg > 58 or away.possession_avg > 58:
+            prob += 5
+            dominant = home.name if home.possession_avg > away.possession_avg else away.name
+            reasons.append(f"{dominant} dominates possession — forces corners")
+
+        # High-pressing teams create more corner situations
+        combined_shots = home.shots_per_game + away.shots_per_game
+        if combined_shots > 28:
+            prob += 7
+            reasons.append(f"High combined shots ({combined_shots:.1f}/game) — more corners likely")
+        elif combined_shots < 20:
+            prob -= 5
+            reasons.append(f"Low shot volume ({combined_shots:.1f}/game)")
+
+        # Quality gap = more corners for dominant team
+        pos_gap = abs(home.league_position - away.league_position)
+        if pos_gap > 8:
+            prob += 5
+            reasons.append(f"Big quality gap (positions: {home.league_position} vs {away.league_position}) — one team will dominate")
+
+        # Live
+        if ctx.is_live:
+            remaining = 90 - ctx.current_minute
+            current = ctx.total_corners
+            rate = expected_corners / 90
+            projected = current + rate * remaining
+            if current > line:
+                prob = 98
+                reasons.append(f"Already {current} corners with {remaining} mins left")
+            else:
+                needed = line + 1 - current
+                reasons.append(f"Current: {current} corners, projected: {projected:.1f}")
+                if projected > line + 1:
+                    prob += 15
+                elif projected < line:
+                    prob -= 10
+
+        prob = max(3, min(97, prob))
+        return self._build_prediction(f"Over {line} corners?", prob, reasons)
+
     def predict_clean_sheet(self, ctx: MatchContext, team_name: str) -> Prediction:
         """Will a specific team keep a clean sheet?"""
         reasons = []
@@ -558,6 +787,30 @@ class FootballPredictor:
         if away.key_injuries:
             inj = ", ".join(f"{p.name} ({p.injury_description})" for p in away.key_injuries)
             lines.append(f"  Injuries: {inj}")
+
+        # Head-to-head
+        h2h = home.head_to_head.get(away.name)
+        if h2h and h2h.games > 0:
+            lines += [
+                f"",
+                f"  --- Head to Head ---",
+                f"  Meetings: {h2h.games}  ({h2h.wins}W {h2h.draws}D {h2h.losses}L for {home.name})",
+                f"  Avg goals/game: {h2h.avg_goals_per_game:.1f}",
+            ]
+            if h2h.last_scores:
+                lines.append(f"  Recent scores: {', '.join(h2h.last_scores[:5])}")
+
+        # Lineups if available
+        if home.lineup:
+            lines += [f"", f"  --- {home.name} Lineup ---"]
+            for p in home.lineup:
+                status = " (INJ)" if p.injured else ""
+                lines.append(f"  {p.position}: {p.name} ({p.goals}G {p.assists}A){status}")
+        if away.lineup:
+            lines += [f"", f"  --- {away.name} Lineup ---"]
+            for p in away.lineup:
+                status = " (INJ)" if p.injured else ""
+                lines.append(f"  {p.position}: {p.name} ({p.goals}G {p.assists}A){status}")
 
         lines.append("")
         return "\n".join(lines)
