@@ -103,6 +103,167 @@ def fetch_team_matches(team_id: int, api_key: str, limit: int = 15) -> list[dict
     return data["matches"]
 
 
+def fetch_todays_matches(competition: Competition, api_key: str) -> list[dict]:
+    """Fetch today's matches for a competition."""
+    today = date.today().isoformat()
+    comp_id = COMPETITION_IDS.get(competition)
+    if not comp_id:
+        return []
+    data = _api_get(
+        f"/competitions/{comp_id}/matches?dateFrom={today}&dateTo={today}", api_key
+    )
+    if not data or "matches" not in data:
+        return []
+    return data["matches"]
+
+
+def fetch_match_details(match_id: int, api_key: str) -> dict:
+    """Fetch full match details including lineups."""
+    data = _api_get(f"/matches/{match_id}", api_key)
+    return data if data else {}
+
+
+def fetch_head_to_head(match_id: int, api_key: str, limit: int = 10) -> list[dict]:
+    """Fetch head-to-head history for a match."""
+    data = _api_get(f"/matches/{match_id}/head2head?limit={limit}", api_key)
+    if not data or "aggregates" not in data:
+        return []
+    return data
+
+
+def extract_lineups_from_match(match_data: dict) -> tuple[list[PlayerInfo], list[PlayerInfo]]:
+    """Extract home and away lineups from match detail data."""
+    home_lineup = []
+    away_lineup = []
+
+    home_team = match_data.get("homeTeam", {})
+    away_team = match_data.get("awayTeam", {})
+
+    # football-data.org provides lineups in homeTeam.lineup and awayTeam.lineup
+    for player in home_team.get("lineup", []):
+        home_lineup.append(PlayerInfo(
+            name=player.get("name", "Unknown"),
+            position=player.get("position", "?"),
+            goals=0, assists=0,
+            rating=6.5,
+        ))
+    for player in away_team.get("lineup", []):
+        away_lineup.append(PlayerInfo(
+            name=player.get("name", "Unknown"),
+            position=player.get("position", "?"),
+            goals=0, assists=0,
+            rating=6.5,
+        ))
+
+    return home_lineup, away_lineup
+
+
+def extract_h2h_from_api(h2h_data: dict, home_name: str) -> Optional['HeadToHead']:
+    """Build HeadToHead from API head-to-head data."""
+    from .data import HeadToHead
+
+    agg = h2h_data.get("aggregates", {})
+    matches = h2h_data.get("matches", [])
+    total = agg.get("numberOfMatches", 0)
+    if total == 0:
+        return None
+
+    home_agg = agg.get("homeTeam", {})
+    away_agg = agg.get("awayTeam", {})
+
+    # Determine which side is "our" home team
+    # The API uses the match's home/away, not our perspective
+    # So we need to scan matches to build from our team's perspective
+    wins = draws = losses = 0
+    goals_scored = goals_conceded = 0
+    last_results = []
+    last_scores = []
+
+    for m in matches[:10]:
+        ft = m.get("score", {}).get("fullTime", {})
+        hg = ft.get("home")
+        ag = ft.get("away")
+        m_home = m.get("homeTeam", {}).get("name", "")
+
+        if hg is None or ag is None:
+            continue
+
+        if home_name.lower() in m_home.lower() or m_home.lower() in home_name.lower():
+            # Our team was home
+            goals_scored += hg
+            goals_conceded += ag
+            if hg > ag:
+                wins += 1; last_results.append("W")
+            elif hg == ag:
+                draws += 1; last_results.append("D")
+            else:
+                losses += 1; last_results.append("L")
+            last_scores.append(f"{hg}-{ag}")
+        else:
+            # Our team was away
+            goals_scored += ag
+            goals_conceded += hg
+            if ag > hg:
+                wins += 1; last_results.append("W")
+            elif ag == hg:
+                draws += 1; last_results.append("D")
+            else:
+                losses += 1; last_results.append("L")
+            last_scores.append(f"{ag}-{hg}")
+
+    return HeadToHead(
+        opponent="",
+        games=wins + draws + losses,
+        wins=wins, draws=draws, losses=losses,
+        goals_scored=goals_scored, goals_conceded=goals_conceded,
+        last_results=last_results, last_scores=last_scores,
+    )
+
+
+def find_todays_match(home_name: str, away_name: str, api_key: str) -> Optional[dict]:
+    """Search today's fixtures across all leagues for a specific match.
+    Returns match data dict if found, including match ID for lineup fetching.
+    """
+    for comp in COMPETITION_IDS:
+        matches = fetch_todays_matches(comp, api_key)
+        for m in matches:
+            m_home = m.get("homeTeam", {}).get("name", "").lower()
+            m_away = m.get("awayTeam", {}).get("name", "").lower()
+            if (_fuzzy_match(home_name.lower(), m_home) and
+                    _fuzzy_match(away_name.lower(), m_away)):
+                return m
+            # Also check reverse fuzzy
+            if (home_name.lower() in m_home or m_home in home_name.lower()) and \
+               (away_name.lower() in m_away or m_away in away_name.lower()):
+                return m
+    return None
+
+
+def fetch_lineups_for_match(
+    home_name: str, away_name: str, api_key: str
+) -> tuple[list[PlayerInfo], list[PlayerInfo], Optional[dict]]:
+    """Try to fetch lineups for today's match between these teams.
+    Returns (home_lineup, away_lineup, h2h_data).
+    Lineups are available ~30 mins before kickoff.
+    """
+    match_data = find_todays_match(home_name, away_name, api_key)
+    if not match_data:
+        return [], [], None
+
+    match_id = match_data.get("id")
+    if not match_id:
+        return [], [], None
+
+    # Fetch full match details (includes lineups if available)
+    details = fetch_match_details(match_id, api_key)
+    home_lineup, away_lineup = extract_lineups_from_match(details)
+
+    # Fetch H2H
+    h2h_data = fetch_head_to_head(match_id, api_key)
+
+    return home_lineup, away_lineup, h2h_data
+
+
 def fetch_scorers(competition: Competition, api_key: str, limit: int = 25) -> list[dict]:
     """Fetch top scorers for a competition."""
     comp_id = COMPETITION_IDS.get(competition)

@@ -43,6 +43,68 @@ class Prediction:
 class FootballPredictor:
     """Main prediction engine using statistical analysis."""
 
+    def _lineup_strength(self, team: 'TeamSeason') -> tuple[float, list[str]]:
+        """Assess lineup strength. Returns (adjustment, reasons).
+        adjustment: positive = stronger than expected, negative = weaker.
+        """
+        reasons = []
+        adjustment = 0.0
+
+        if not team.lineup:
+            return 0.0, []
+
+        lineup_names = {p.name.lower() for p in team.lineup}
+        squad_names = {p.name.lower() for p in team.players}
+
+        # Check if best player is in lineup
+        best = team.best_player
+        if best:
+            best_in = any(
+                best.name.lower() in ln or ln in best.name.lower()
+                for ln in lineup_names
+            )
+            if not best_in:
+                adjustment -= 8
+                reasons.append(f"⚠️ {best.name} (best player, rating {best.rating:.1f}) NOT in lineup")
+            else:
+                adjustment += 2
+                reasons.append(f"✅ {best.name} starts")
+
+        # Check top scorers in lineup
+        top_scorers = sorted(
+            [p for p in team.players if p.goals >= 3],
+            key=lambda p: p.goals, reverse=True
+        )[:3]
+        for scorer in top_scorers:
+            in_lineup = any(
+                scorer.name.lower() in ln or ln in scorer.name.lower()
+                for ln in lineup_names
+            )
+            if not in_lineup and scorer != best:
+                adjustment -= 4
+                reasons.append(f"⚠️ {scorer.name} ({scorer.goals}G) not in lineup")
+
+        # Count high-rated players in lineup
+        lineup_ratings = []
+        for lp in team.lineup:
+            # Find their rating from squad
+            for sp in team.players:
+                if (lp.name.lower() in sp.name.lower() or
+                        sp.name.lower() in lp.name.lower()):
+                    lineup_ratings.append(sp.rating)
+                    break
+
+        if lineup_ratings:
+            avg_rating = sum(lineup_ratings) / len(lineup_ratings)
+            if avg_rating > 7.5:
+                adjustment += 3
+                reasons.append(f"Strong lineup (avg rating: {avg_rating:.1f})")
+            elif avg_rating < 6.5:
+                adjustment -= 3
+                reasons.append(f"Weakened lineup (avg rating: {avg_rating:.1f})")
+
+        return adjustment, reasons
+
     def predict_first_half_goal(self, ctx: MatchContext) -> Prediction:
         """Will there be a goal in the first half?"""
         reasons = []
@@ -331,6 +393,26 @@ class FootballPredictor:
             f"{away.name} {away.points_per_game:.2f}"
         )
 
+        # Lineup strength
+        h_lineup_adj, h_lineup_reasons = self._lineup_strength(home)
+        a_lineup_adj, a_lineup_reasons = self._lineup_strength(away)
+        home_prob += h_lineup_adj
+        away_prob += a_lineup_adj
+        home_prob -= a_lineup_adj * 0.5  # opponent's strong lineup hurts you
+        away_prob -= h_lineup_adj * 0.5
+        reasons.extend(h_lineup_reasons)
+        reasons.extend(a_lineup_reasons)
+
+        # Head-to-head
+        h2h = home.head_to_head.get(away.name)
+        if h2h and h2h.games >= 3:
+            if h2h.win_pct > 60:
+                home_prob += 5
+                reasons.append(f"H2H favours {home.name}: {h2h.wins}W {h2h.draws}D {h2h.losses}L")
+            elif h2h.win_pct < 30:
+                away_prob += 5
+                reasons.append(f"H2H favours {away.name}: {h2h.losses}W {h2h.draws}D {h2h.wins}L")
+
         # Injuries
         home_injuries = len(home.key_injuries)
         away_injuries = len(away.key_injuries)
@@ -495,6 +577,20 @@ class FootballPredictor:
         if away.form.form_rating < 35:
             exp_away *= 0.9
 
+        # Lineup adjustments
+        h_lineup_adj, h_lineup_reasons = self._lineup_strength(home)
+        a_lineup_adj, a_lineup_reasons = self._lineup_strength(away)
+        if h_lineup_adj < -5:
+            exp_home *= 0.85
+            reasons.extend(h_lineup_reasons)
+        elif h_lineup_adj > 3:
+            exp_home *= 1.05
+        if a_lineup_adj < -5:
+            exp_away *= 0.85
+            reasons.extend(a_lineup_reasons)
+        elif a_lineup_adj > 3:
+            exp_away *= 1.05
+
         # Head-to-head adjustment
         h2h = home.head_to_head.get(away.name)
         if h2h and h2h.games >= 3:
@@ -502,6 +598,13 @@ class FootballPredictor:
             reasons.append(f"H2H: {h2h.wins}W {h2h.draws}D {h2h.losses}L in last {h2h.games} meetings")
             if h2h.last_scores:
                 reasons.append(f"Recent scores: {', '.join(h2h.last_scores[:5])}")
+            # Adjust expected goals based on H2H goal average
+            if h2h_avg > 3.0:
+                exp_home *= 1.05
+                exp_away *= 1.05
+            elif h2h_avg < 2.0:
+                exp_home *= 0.95
+                exp_away *= 0.95
 
         # Round to nearest likely scoreline
         h_goals = round(exp_home)

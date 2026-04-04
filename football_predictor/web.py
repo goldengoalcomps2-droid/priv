@@ -19,7 +19,8 @@ from .predictor import FootballPredictor
 from .sample_data import get_sample_teams
 from .scraper import (
     build_team_season_from_api, fetch_standings, load_all_leagues,
-    enrich_team_with_matches, COMPETITION_IDS,
+    enrich_team_with_matches, fetch_lineups_for_match, extract_h2h_from_api,
+    COMPETITION_IDS,
 )
 
 # Global state
@@ -57,6 +58,39 @@ def find_team(name: str) -> Optional[TeamSeason]:
         if mapped in team.name.lower() or mapped in key:
             return team
     return None
+
+
+def _merge_lineup_with_squad(
+    lineup: list, squad: list
+) -> list:
+    """Merge API lineup with existing squad data to preserve goals/assists/ratings."""
+    from .data import PlayerInfo
+    merged = []
+    for lp in lineup:
+        # Try to find in existing squad by name match
+        match = None
+        for sp in squad:
+            if (lp.name.lower() in sp.name.lower() or
+                    sp.name.lower() in lp.name.lower() or
+                    lp.name.split()[-1].lower() == sp.name.split()[-1].lower()):
+                match = sp
+                break
+        if match:
+            # Use squad stats but lineup position
+            merged.append(PlayerInfo(
+                name=match.name,
+                position=lp.position if lp.position != "?" else match.position,
+                goals=match.goals,
+                assists=match.assists,
+                minutes_played=match.minutes_played,
+                injured=match.injured,
+                injury_description=match.injury_description,
+                suspended=match.suspended,
+                rating=match.rating,
+            ))
+        else:
+            merged.append(lp)
+    return merged
 
 
 def handle_message(text: str) -> str:
@@ -170,7 +204,7 @@ def handle_message(text: str) -> str:
         if not away:
             return f"Team '{away_name}' not found. Type <code>teams</code> to see available teams."
 
-        # Auto-enrich
+        # Auto-enrich with form/stats
         if api_key:
             for team in [home, away]:
                 if not team.form.results:
@@ -179,6 +213,38 @@ def handle_message(text: str) -> str:
                         if sname == team.name and "id" in sdata:
                             enrich_team_with_matches(team, api_key, sdata["id"])
                             break
+
+        # Auto-fetch lineups and H2H from today's fixtures
+        lineup_status = ""
+        h2h_status = ""
+        if api_key:
+            try:
+                home_lineup, away_lineup, h2h_data = fetch_lineups_for_match(
+                    home.name, away.name, api_key
+                )
+                if home_lineup:
+                    # Merge lineup with existing squad data (match ratings/goals)
+                    merged_home = _merge_lineup_with_squad(home_lineup, home.players)
+                    home.lineup = merged_home
+                    lineup_status += f"<br>📋 {home.name} lineup: {', '.join(p.name for p in merged_home[:11])}"
+                if away_lineup:
+                    merged_away = _merge_lineup_with_squad(away_lineup, away.players)
+                    away.lineup = merged_away
+                    lineup_status += f"<br>📋 {away.name} lineup: {', '.join(p.name for p in merged_away[:11])}"
+                if not home_lineup and not away_lineup:
+                    lineup_status = "<br>⏳ Lineups not yet available (released ~30 mins before kickoff)"
+
+                if h2h_data:
+                    h2h = extract_h2h_from_api(h2h_data, home.name)
+                    if h2h and h2h.games > 0:
+                        h2h.opponent = away.name
+                        home.head_to_head[away.name] = h2h
+                        h2h_status = (f"<br>📊 H2H: {h2h.wins}W {h2h.draws}D {h2h.losses}L "
+                                      f"({h2h.games} games, {h2h.avg_goals_per_game:.1f} goals/game)")
+                        if h2h.last_scores:
+                            h2h_status += f"<br>Recent: {', '.join(h2h.last_scores[:5])}"
+            except Exception as e:
+                lineup_status = f"<br>⚠️ Could not fetch lineups/H2H: {e}"
 
         competition = home.competition
         is_cup = home.competition != away.competition
@@ -197,7 +263,9 @@ def handle_message(text: str) -> str:
             result += f"{home.name} form: {' '.join(home.form.results[-6:])}<br>"
         if away.form.results:
             result += f"{away.name} form: {' '.join(away.form.results[-6:])}<br>"
-        result += "<br>Now ask me anything! Try: <code>result</code>, <code>btts</code>, <code>over 2.5</code>, <code>first half goal?</code>"
+        result += h2h_status
+        result += lineup_status
+        result += "<br><br>Now ask me anything! Try: <code>result</code>, <code>btts</code>, <code>over 2.5</code>, <code>first half goal?</code>"
         return result
 
     # Lineup input: "lineup home Salah, Van Dijk, Rice" or "lineup away Saka, Havertz"
