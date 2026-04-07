@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Team - Command Centre</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg1:#0a0e17;--bg2:#111827;--bg3:#1a2332;--bg4:#0d1422;--bdr:#1e3a5f;--t1:#e2e8f0;--t2:#94a3b8;--t3:#64748b;--blue:#3b82f6;--cyan:#06b6d4;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--pink:#ec4899;--orange:#f97316}
+body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg1);color:var(--t1);height:100vh;display:flex;overflow:hidden}
+.sidebar{width:260px;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-hdr{padding:16px;border-bottom:1px solid var(--bdr);background:linear-gradient(135deg,#0f172a,#1e293b)}
+.sidebar-hdr h1{font-size:15px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase}
+.sidebar-hdr .sub{font-size:10px;color:var(--t3);margin-top:4px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.section{padding:6px 12px;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-top:8px}
+.alist{flex:1;overflow-y:auto;padding:8px}
+.ai{padding:8px 10px;margin-bottom:3px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
+.ai:hover{background:var(--bg3)}
+.aicon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.aicon.str{background:rgba(139,92,246,.2);color:var(--purple)}.aicon.res{background:rgba(6,182,212,.2);color:var(--cyan)}
+.aicon.ops{background:rgba(16,185,129,.2);color:var(--green)}.aicon.frc{background:rgba(245,158,11,.2);color:var(--yellow)}
+.aicon.qaa{background:rgba(239,68,68,.2);color:var(--red)}.aicon.rsc{background:rgba(249,115,22,.2);color:var(--orange)}
+.aicon.oc{background:rgba(236,72,153,.2);color:var(--pink)}.aicon.pc{background:rgba(168,85,247,.2);color:#a855f7}
+.aname{font-size:12px;font-weight:600}.arole{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.qbtn{display:block;width:calc(100% - 16px);margin:3px 8px;padding:7px 10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:5px;color:var(--t2);font-size:11px;cursor:pointer;text-align:left;font-family:inherit;transition:.2s}
+.qbtn:hover{border-color:var(--cyan);color:var(--t1)}
+.sfooter{padding:10px;border-top:1px solid var(--bdr);font-size:10px;color:var(--t3);text-align:center}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chdr{padding:12px 20px;background:var(--bg2);border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center}
+.chdr h2{font-size:13px}.hstats{display:flex;gap:14px;font-size:10px}
+.stat{display:flex;align-items:center;gap:4px;color:var(--t2)}.sv{color:var(--cyan);font-weight:700}
+.msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;gap:10px;max-width:85%;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.usr{align-self:flex-end;flex-direction:row-reverse}
+.mav{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-weight:700}
+.msg.usr .mav{background:rgba(59,130,246,.2);color:var(--blue)}
+.mc{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;min-width:60px}
+.msg.usr .mc{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.25)}
+.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.msn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.msn.strategy{color:var(--purple)}.msn.research{color:var(--cyan)}.msn.operations{color:var(--green)}
+.msn.forecast{color:var(--yellow)}.msn.qa{color:var(--red)}.msn.resource{color:var(--orange)}
+.msn.orchestrator{color:var(--blue)}.msn.user{color:var(--blue)}
+.mt{font-size:9px;color:var(--t3)}
+.mb{font-size:12px;line-height:1.6;color:var(--t2);white-space:pre-wrap;word-wrap:break-word}
+.mb strong{color:var(--t1)}.mb code{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px;font-size:11px}
+.cinput{padding:14px 20px;background:var(--bg2);border-top:1px solid var(--bdr)}
+.iw{display:flex;gap:8px;align-items:center}
+.ci{flex:1;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:10px 14px;color:var(--t1);font-size:12px;font-family:inherit;outline:none;transition:.2s}
+.ci:focus{border-color:var(--cyan)}.ci::placeholder{color:var(--t3)}
+.sbtn{width:40px;height:40px;background:var(--cyan);border:none;border-radius:8px;color:var(--bg1);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.sbtn:hover{background:#0ea5e9;transform:scale(1.05)}
+.ihint{margin-top:6px;font-size:9px;color:var(--t3);text-align:center}
+.rpanel{width:280px;background:var(--bg2);border-left:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.phdr{padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--t3)}
+.pcont{flex:1;overflow-y:auto;padding:10px}
+.pcard{background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:10px;margin-bottom:7px}
+.pcard h4{font-size:10px;color:var(--cyan);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.pcard .val{font-size:22px;font-weight:700}.pcard .lbl{font-size:9px;color:var(--t3);margin-top:2px}
+.tbar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:4px;overflow:hidden}
+.tbfill{height:100%;border-radius:3px;transition:width .5s}
+.titem{margin-bottom:8px}.tname{font-size:10px;color:var(--t2);margin-bottom:2px}.tpct{font-size:9px;color:var(--t3);float:right}
+.welcome{text-align:center;padding:30px 16px;color:var(--t3)}
+.welcome h2{color:var(--cyan);font-size:16px;margin-bottom:6px}.welcome p{font-size:11px;line-height:1.8}
+.typing{display:flex;gap:3px;padding:6px 0}.typing span{width:5px;height:5px;background:var(--t3);border-radius:50%;animation:typ 1.4s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes typ{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+@media(max-width:900px){.rpanel{display:none}.sidebar{width:50px}.sidebar .ainfo,.sidebar .section,.sidebar .qbtn,.sidebar .sub,.sidebar .sfooter{display:none}.sidebar-hdr h1{font-size:9px;text-align:center;letter-spacing:0}.ai{justify-content:center;padding:8px 4px}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="sidebar-hdr"><h1>Agent Team</h1><div class="sub"><span class="dot"></span>Command Centre Online</div></div>
+<div class="section">Internal Agents</div>
+<div class="alist">
+<div class="ai" onclick="sq('run strategy')"><div class="aicon str">S</div><div class="ainfo"><div class="aname">Strategy</div><div class="arole">Plans & Methods</div></div></div>
+<div class="ai" onclick="sq('run research')"><div class="aicon res">R</div><div class="ainfo"><div class="aname">Research</div><div class="arole">Data & Analysis</div></div></div>
+<div class="ai" onclick="sq('run operations')"><div class="aicon ops">O</div><div class="ainfo"><div class="aname">Operations</div><div class="arole">Task Execution</div></div></div>
+<div class="ai" onclick="sq('run forecast')"><div class="aicon frc">F</div><div class="ainfo"><div class="aname">Forecast</div><div class="arole">Predictions & Risk</div></div></div>
+<div class="ai" onclick="sq('run qa')"><div class="aicon qaa">Q</div><div class="ainfo"><div class="aname">QA</div><div class="arole">Testing & Validation</div></div></div>
+<div class="ai" onclick="sq('run resource')"><div class="aicon rsc">T</div><div class="ainfo"><div class="aname">Resource</div><div class="arole">Tools & Integration</div></div></div>
+</div>
+<div class="section">External Agents (ACP)</div>
+<div class="ai" onclick="sq('acp')"><div class="aicon oc">OC</div><div class="ainfo"><div class="aname">OpenClaw</div><div class="arole">Legal & Compliance</div></div></div>
+<div class="ai" onclick="sq('acp')"><div class="aicon pc">PC</div><div class="ainfo"><div class="aname">PaperClip</div><div class="arole">Documents & Content</div></div></div>
+<div class="section">Quick Commands</div>
+<button class="qbtn" onclick="sq('status')">Status</button>
+<button class="qbtn" onclick="sq('tasks')">Task Board</button>
+<button class="qbtn" onclick="sq('approvals')">Approvals</button>
+<button class="qbtn" onclick="sq('run cycle')">Run Cycle</button>
+<button class="qbtn" onclick="sq('forecast')">Forecast</button>
+<button class="qbtn" onclick="sq('help')">Help</button>
+<div class="sfooter">v1.0.0 | 6 Agents Active</div>
+</div>
+
+<div class="main">
+<div class="chdr">
+<h2><span class="dot"></span>Agent Team Gateway</h2>
+<div class="hstats">
+<div class="stat">Agents:<span class="sv" id="sAgents">6</span></div>
+<div class="stat">Cycle:<span class="sv" id="sCycle">0</span></div>
+<div class="stat">Approvals:<span class="sv" id="sAppr">0</span></div>
+</div>
+</div>
+<div class="msgs" id="msgs">
+<div class="welcome"><h2>Agent Team Command Centre</h2><p>6 agents standing by. Type a command or message below.<br>Try: <code>status</code> | <code>tasks</code> | <code>forecast</code> | <code>run cycle</code> | <code>help</code></p></div>
+</div>
+<div class="cinput"><div class="iw"><input type="text" class="ci" id="inp" placeholder="Message the team or type a command..." autocomplete="off"><button class="sbtn" onclick="send()">&#9654;</button></div><div class="ihint">Press Enter to send | Type 'help' for commands</div></div>
+</div>
+
+<div class="rpanel">
+<div class="phdr">Project Dashboard</div>
+<div class="pcont" id="panel">
+<div class="pcard"><h4>Project</h4><div class="val" style="font-size:13px" id="pName">£10K Monthly Income Engine</div><div class="lbl" id="pStat">active</div></div>
+<div class="pcard"><h4>Goals</h4><div class="val" id="pGoals">5</div><div class="lbl">defined</div></div>
+<div class="pcard"><h4>Tasks</h4><div style="display:flex;gap:10px"><div><div class="val" style="font-size:16px" id="pPend">49</div><div class="lbl">Pending</div></div><div><div class="val" style="font-size:16px;color:var(--yellow)" id="pAct">0</div><div class="lbl">Active</div></div><div><div class="val" style="font-size:16px;color:var(--green)" id="pDone">0</div><div class="lbl">Done</div></div></div></div>
+<div class="pcard"><h4>Targets</h4><div id="tgtList"></div></div>
+</div>
+</div>
+
+<script>
+// ============ PROJECT DATA ============
+const P={name:"\u00a310K Monthly Income Engine",status:"active",cycle:0,
+goals:[
+{id:"g1",title:"YouTube Revenue Stream",desc:"Build YouTube channel generating ad revenue, sponsorships and affiliate income",target:"\u00a32,000-\u00a35,000/month, 300K-500K views/month",deadline:"2026-10-07",pct:0,status:"active"},
+{id:"g2",title:"Instagram AI Influencer Revenue",desc:"Create AI influencer personas on Instagram for brand deals and affiliate marketing",target:"\u00a32,000-\u00a35,000/month, 100K views/month",deadline:"2026-10-07",pct:0,status:"active"},
+{id:"g3",title:"TikTok AI Influencer Revenue",desc:"Create AI influencer personas on TikTok for creator fund, brand deals and affiliates",target:"\u00a32,000-\u00a35,000/month, 500K views/month",deadline:"2026-10-07",pct:0,status:"active"},
+{id:"g4",title:"Collectibles Trading Profit",desc:"Buy Pokemon, One Piece and Dragon Ball collectibles and resell for profit",target:"\u00a32,000-\u00a35,000/month net profit",deadline:"2026-10-07",pct:0,status:"active"},
+{id:"g5",title:"\u00a310K Monthly Income Target",desc:"Achieve combined monthly income of \u00a310,000 across all streams",target:"\u00a310,000/month total",deadline:"2026-10-07",pct:0,status:"active"}
+],
+targets:[
+{name:"YouTube Monthly Views",cur:0,tgt:400000,unit:"views",color:"var(--blue)"},
+{name:"YouTube Monthly Revenue",cur:0,tgt:3500,unit:"GBP",color:"var(--blue)"},
+{name:"YouTube Subscribers",cur:0,tgt:50000,unit:"subs",color:"var(--purple)"},
+{name:"Instagram Monthly Views",cur:0,tgt:100000,unit:"views",color:"var(--pink)"},
+{name:"Instagram Monthly Revenue",cur:0,tgt:3500,unit:"GBP",color:"var(--pink)"},
+{name:"Instagram Followers",cur:0,tgt:50000,unit:"followers",color:"var(--pink)"},
+{name:"TikTok Monthly Views",cur:0,tgt:500000,unit:"views",color:"var(--cyan)"},
+{name:"TikTok Monthly Revenue",cur:0,tgt:3500,unit:"GBP",color:"var(--cyan)"},
+{name:"TikTok Followers",cur:0,tgt:100000,unit:"followers",color:"var(--cyan)"},
+{name:"Collectibles Net Profit",cur:0,tgt:3500,unit:"GBP",color:"var(--orange)"},
+{name:"Collectibles Inventory",cur:0,tgt:10000,unit:"GBP",color:"var(--orange)"},
+{name:"Total Monthly Income",cur:0,tgt:10000,unit:"GBP",color:"var(--green)"}
+],
+tasks:{
+youtube:["Research top 10 high-CPM YouTube niches","Select channel niche + competitor analysis","Create YouTube channel branding","Set up AI voiceover pipeline","Set up video editing workflow","Script + produce first 10 videos","Publish with SEO-optimised titles & thumbnails","Apply for YouTube Partner Programme","Research affiliate programmes","Analyse first month performance","Scale to 5 videos/week","Begin YouTube Shorts strategy"],
+instagram:["Research top AI influencer accounts","Select AI image generation tool","Design 2 AI influencer personas","Create Instagram accounts","Generate 30 days content per persona","Implement hashtag + engagement strategy","Begin daily posting schedule","Grow to 1K followers per account","Start brand outreach at 5K+","Set up affiliate links + link-in-bio"],
+tiktok:["Research viral TikTok content formats","Adapt AI personas for TikTok","Create TikTok accounts","Develop 5 content templates","Produce + post first 50 TikToks","Analyse which formats get traction","Scale to 3-5 posts/day","Apply for Creator Fund","Set up TikTok Shop + affiliates","Cross-promote to Instagram Reels"],
+collectibles:["Research Pokemon TCG market","Research One Piece market","Research Dragon Ball market","Identify top 5 sourcing channels","Set up eBay seller account","Set up Mercari + TCGPlayer accounts","Purchase first \u00a3500 test inventory","List + sell test inventory","Track limited edition releases","Build pricing spreadsheet","Scale to \u00a32K monthly purchases","Research grading services"],
+cross:["Set up revenue tracking dashboard","Set up analytics for all platforms","Create content calendar","Weekly performance review","Monthly income report"]
+},
+strategies:[
+{title:"YouTube Revenue Stream Strategy",desc:"Faceless/AI-assisted channel in high-CPM niche. 3-5 vids/week. AdSense + affiliates + sponsors.",actions:["Identify top 3 high-CPM niches","Set up channel with pro branding","Create content pipeline","Publish 3-5 videos/week","Optimise for algorithm","Monetise via AdSense + affiliates + sponsors"]},
+{title:"Instagram AI Influencer Strategy",desc:"2-3 AI personas using Flux/Midjourney. Fashion, fitness, lifestyle niches. Brand deals + Fanvue.",actions:["Design 2-3 AI personas","Set up accounts with pro branding","1-2 posts/day + stories + reels","Hashtag + engagement strategy","Brand outreach at 10K+","Affiliate links in bio"]},
+{title:"TikTok AI Influencer Strategy",desc:"AI personas for viral short-form. Creator Rewards + TikTok Shop + brand deals.",actions:["Create TikTok-optimised personas","3-5 posts/day","Trending sounds + hashtags","Creator Fund eligibility","Cross-promote with Instagram","TikTok Shop affiliates"]},
+{title:"Collectibles Trading Strategy",desc:"Source Pokemon, One Piece, Dragon Ball below market. 30%+ margins. eBay/Mercari/TCGPlayer.",actions:["Research market prices","Identify wholesale sources","Track limited editions","Build inventory with verified trends","Set up seller accounts","Minimum 30% margin per item"]},
+{title:"Cross-Stream Optimisation",desc:"Maximise total income by cross-promoting, reinvesting, and diversifying within each stream.",actions:["Cross-promote all platforms","Reinvest in highest performer","Build email list","Unified tracking dashboard"]}
+],
+agents:{strategy:{name:"StrategyAgent",active:true,actions:0,caps:["strategic_planning","goal_decomposition","method_design"]},research:{name:"ResearchAgent",active:true,actions:0,caps:["market_analysis","competitive_intelligence","data_analysis"]},operations:{name:"OperationsAgent",active:true,actions:0,caps:["task_execution","dependency_management","progress_tracking"]},forecast:{name:"ForecastAgent",active:true,actions:0,caps:["trend_extrapolation","capacity_planning","scenario_modelling"]},qa:{name:"QAAgent",active:true,actions:0,caps:["functional_testing","compliance_checking","quality_monitoring"]},resource:{name:"ResourceAgent",active:true,actions:0,caps:["tool_discovery","resource_evaluation","integration_management"]}},
+approvals:[],taskStatus:{}};
+
+// Init task statuses
+let tid=0;
+["youtube","instagram","tiktok","collectibles","cross"].forEach(s=>{P.tasks[s].forEach(t=>{P.taskStatus["t"+(++tid)]={title:t,stream:s,status:"pending",assigned:["research","strategy","operations","forecast","qa","resource"][tid%6],id:"t"+tid}})});
+
+// Generate initial approvals
+["New strategy: YouTube Revenue","New strategy: Instagram AI","New strategy: TikTok AI","New strategy: Collectibles","Recovery plan: YouTube Views","Forecast risk: All targets at 0%","Quality alert: Score 25/100","Resource needed: Analytics platform"].forEach((t,i)=>{
+P.approvals.push({id:"ap"+i,title:t,agent:["strategy","strategy","strategy","strategy","strategy","forecast","qa","resource"][i],priority:i<5?"high":"critical",desc:t+" - Requires your approval to proceed.",status:"pending"});
+});
+
+// ============ ICONS ============
+const IC={strategy:"S",research:"R",operations:"O",forecast:"F",qa:"Q",resource:"T",orchestrator:"\u25CF"};
+const BGIC={strategy:"str",research:"res",operations:"ops",forecast:"frc",qa:"qaa",resource:"rsc",orchestrator:"str"};
+
+// ============ DOM ============
+const $=id=>document.getElementById(id);
+const msgs=$("msgs"),inp=$("inp");
+
+function now(){return new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
+function addMsg(sender,role,text,isUser){
+const w=msgs.querySelector(".welcome");if(w)w.remove();
+const d=document.createElement("div");d.className="msg"+(isUser?" usr":"");
+const ic=isUser?"\u2605":(IC[role]||"?");
+const bg=isUser?"":"aicon "+(BGIC[role]||"str");
+let r=text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/`(.+?)`/g,"<code>$1</code>");
+d.innerHTML=`<div class="mav ${isUser?"":"aicon "+(BGIC[role]||"str")}">${ic}</div><div class="mc"><div class="mhdr"><span class="msn ${role||"orchestrator"}">${sender}</span><span class="mt">${now()}</span></div><div class="mb">${r}</div></div>`;
+msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function showTyping(){const d=document.createElement("div");d.className="msg";d.id="typing";d.innerHTML='<div class="mav aicon str">\u25CF</div><div class="mc"><div class="typing"><span></span><span></span><span></span></div></div>';msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d}
+
+function updPanel(){
+$("pGoals").textContent=P.goals.length;
+let pn=0,ac=0,dn=0;Object.values(P.taskStatus).forEach(t=>{if(t.status==="pending")pn++;else if(t.status==="in_progress")ac++;else if(t.status==="completed")dn++});
+$("pPend").textContent=pn;$("pAct").textContent=ac;$("pDone").textContent=dn;
+$("sCycle").textContent=P.cycle;$("sAppr").textContent=P.approvals.filter(a=>a.status==="pending").length;
+let tl=$("tgtList");tl.innerHTML="";
+P.targets.forEach(t=>{let pct=t.tgt?Math.min(100,t.cur/t.tgt*100):0;
+tl.innerHTML+=`<div class="titem"><div class="tname">${t.name}<span class="tpct">${pct.toFixed(0)}%</span></div><div class="tbar"><div class="tbfill" style="width:${pct}%;background:${t.color}"></div></div></div>`});
+}
+
+// ============ COMMAND HANDLERS ============
+function handle(m){
+const lo=m.toLowerCase().trim();
+const R=[];
+
+if(lo==="help"||lo==="commands"){
+R.push({a:"Orchestrator",r:"orchestrator",m:`**Available Commands:**
+
+**Project**
+  \`status\` - Team and project overview
+  \`project\` - Project details
+  \`goals\` - All goals
+  \`targets\` - Targets with progress
+  \`strategies\` - Active strategies
+  \`tasks\` - Task board
+
+**Reports**
+  \`forecast\` - Forecast + risk
+  \`quality\` - Quality score
+  \`research\` - Research findings
+  \`resources\` - Tools & gaps
+  \`plan\` - Strategic plans
+
+**Execution**
+  \`run cycle\` - Run orchestration cycle
+  \`run <agent>\` - Run specific agent
+
+**Approvals**
+  \`approvals\` - Pending approvals
+  \`approve all\` - Approve everything
+  \`approve <id>\` - Approve one
+  \`reject <id>\` - Reject one
+
+**Other**
+  \`acp\` - External agent status
+  Any text - Message the team`});
+}
+else if(lo==="status"){
+let s=`**Project: ${P.name}** [${P.status}]
+Goals: ${P.goals.length} | Targets: ${P.targets.length} | Tasks: ${Object.keys(P.taskStatus).length}
+`;P.goals.forEach(g=>s+=`\n  Goal: ${g.title} (${g.pct}%)`);
+let pn=0,ac=0,dn=0;Object.values(P.taskStatus).forEach(t=>{if(t.status==="pending")pn++;else if(t.status==="in_progress")ac++;else dn++});
+s+=`\n\n  Tasks: ${pn} pending, ${ac} active, ${dn} done`;
+s+="\n\n**Agents:**";Object.entries(P.agents).forEach(([k,v])=>s+=`\n  ${k}: ${v.active?"ACTIVE":"INACTIVE"} | Actions: ${v.actions}`);
+s+=`\n\nCycles run: ${P.cycle}\nPending approvals: ${P.approvals.filter(a=>a.status==="pending").length}`;
+R.push({a:"Orchestrator",r:"orchestrator",m:s});
+}
+else if(lo==="project"){
+let s=`**${P.name}**\nStatus: ${P.status}\n\n**Outline:**\nMulti-stream income project targeting \u00a310,000/month through:\n1. YouTube (ad revenue, sponsorships, affiliates)\n2. Instagram AI Influencers (brand deals, Fanvue)\n3. TikTok AI Influencers (Creator Fund, TikTok Shop)\n4. Collectibles Trading (Pokemon, One Piece, Dragon Ball)`;
+R.push({a:"Orchestrator",r:"orchestrator",m:s});
+}
+else if(lo==="goals"){
+let s=`**Project Goals (${P.goals.length})**\n`;
+P.goals.forEach(g=>{s+=`\n**${g.title}** [${g.status}] (${g.pct}%)\n  ${g.desc}\n  Target: ${g.target}\n  Deadline: ${g.deadline}\n`});
+R.push({a:"StrategyAgent",r:"strategy",m:s});
+}
+else if(lo==="targets"){
+let s=`**Project Targets (${P.targets.length})**\n`;
+P.targets.forEach(t=>{let pct=t.tgt?Math.min(100,t.cur/t.tgt*100):0;let b="\u2588".repeat(Math.floor(pct/5))+"\u2591".repeat(20-Math.floor(pct/5));
+s+=`\n**${t.name}**\n  [${b}] ${pct.toFixed(1)}%  (${t.cur}/${t.tgt} ${t.unit})\n`});
+R.push({a:"ForecastAgent",r:"forecast",m:s});
+}
+else if(lo==="tasks"){
+["pending","in_progress","completed"].forEach(st=>{
+let ts=Object.values(P.taskStatus).filter(t=>t.status===st);
+if(ts.length){let s=`**${st.toUpperCase()} (${ts.length})**\n`;ts.slice(0,12).forEach(t=>{s+=`  ${st==="completed"?"\u25CF":"\u25CB"} ${t.title} [${t.assigned}] (#${t.id})\n`});if(ts.length>12)s+=`  ... +${ts.length-12} more`;
+R.push({a:"OperationsAgent",r:"operations",m:s})}});
+}
+else if(lo==="strategies"){
+let s=`**Active Strategies (${P.strategies.length})**\n`;
+P.strategies.forEach(st=>{s+=`\n**${st.title}**\n  ${st.desc}\n`;st.actions.forEach(a=>s+=`    - ${a}\n`)});
+R.push({a:"StrategyAgent",r:"strategy",m:s});
+}
+else if(lo==="forecast"){
+let vel=Object.values(P.taskStatus).filter(t=>t.status==="completed").length/Math.max(Object.keys(P.taskStatus).length,1);
+let s=`**Forecast Report**\n\nTask velocity: ${(vel*100).toFixed(0)}%\nTasks remaining: ${Object.values(P.taskStatus).filter(t=>t.status!=="completed").length}\n\n`;
+P.targets.forEach(t=>{let pct=t.tgt?t.cur/t.tgt*100:0;let ok=pct>=25;
+s+=`  ${ok?"\u2713":"\u2717"} **${t.name}**: ${ok?"on_track":"at_risk"}\n    ${pct<10?"Significantly behind. Reallocate resources.":pct<30?"Slightly behind. Monitor closely.":"On track."}\n`});
+s+=`\n**Scenarios:**\n  Best: All targets met with accelerated velocity\n  Expected: Most targets met with current trajectory\n  Worst: Significant delays if no course correction\n\n**Risk Flags:**\n  [HIGH] ${P.targets.filter(t=>t.cur/t.tgt<0.1).length} targets below 10% progress`;
+R.push({a:"ForecastAgent",r:"forecast",m:s});
+}
+else if(lo==="quality"||lo==="qa"){
+let score=25+Object.values(P.taskStatus).filter(t=>t.status==="completed").length*2;score=Math.min(100,score);
+let align=P.goals.filter(g=>!P.strategies.some(s=>s.title.toLowerCase().includes(g.title.toLowerCase().split(" ")[0]))).length;
+let s=`**Quality Report**\n\nQuality Score: **${score}/100**\n\nBreakdown:\n  alignment: ${Math.max(0,100-align*20)}\n  task_quality: ${Object.values(P.taskStatus).filter(t=>t.status==="completed").length>0?85:0}\n  integrations: 100\n  method_compliance: 85\n\nOpen issues: ${align}\nTests run: ${P.cycle}`;
+R.push({a:"QAAgent",r:"qa",m:s});
+}
+else if(lo==="research"){
+R.push({a:"ResearchAgent",r:"research",m:`**Research Report**\n\n**Insights:**\n  [HIGH] Target Achievement Risk: ${P.targets.filter(t=>t.cur/t.tgt<0.2).length} targets below 20% progress\n  [HIGH] All revenue streams need market research executed\n\n**Recommendations:**\n  - YouTube niche analysis: Finance ($15-$45 CPM) or AI/Tech ($15-$22 CPM)\n  - AI influencer research: Flux + LoRA for photorealistic personas\n  - Collectibles: Pokemon 30th Anniversary (Oct 2026) is biggest catalyst\n  - TikTok: Creator Rewards $0.40-$1.00/1K views + TikTok Shop affiliates\n  - competitive_landscape: Pending\n  - industry_trends: Pending`});
+}
+else if(lo==="resources"){
+R.push({a:"ResourceAgent",r:"resource",m:`**Resources & Integrations**\n\nTotal resources: 0\nTotal integrations: 0\n\n**Gaps:**\n  \u2717 analytics: No analytics resource provisioned\n  \u2717 communication: No communication resource provisioned\n  \u2717 automation: No automation resource provisioned\n  \u2717 monitoring: No monitoring resource provisioned\n\n**Recommendations:**\n  \u2192 Revenue tracking dashboard (Google Sheets/Notion)\n  \u2192 AI Content Pipeline (ElevenLabs + Flux + ChatGPT)\n  \u2192 Video editing workflow (CapCut/DaVinci)\n  \u2192 Social media scheduler (Later/Buffer)\n  \u2192 Collectibles pricing tracker`});
+}
+else if(lo==="plan"){
+let s="**Strategic Plans**\n";
+P.strategies.forEach(st=>{s+=`\n**${st.title}**\n  Phase 1: Foundation & Setup\n    - Define KPIs\n    - Identify resources\n    - Set up tracking\n  Phase 2: Execution & Growth\n    - Implement core methods\n    - Monitor progress\n    - Iterate on data\n  Phase 3: Optimisation & Scale\n    - Double down on winners\n    - Eliminate underperformers\n    - Scale proven approaches\n`});
+R.push({a:"StrategyAgent",r:"strategy",m:s});
+}
+else if(lo==="approvals"){
+let pend=P.approvals.filter(a=>a.status==="pending");
+if(!pend.length){R.push({a:"Orchestrator",r:"orchestrator",m:"No pending approvals."});return R}
+let s=`**${pend.length} Pending Approvals:**\n`;
+pend.forEach((a,i)=>{s+=`\n[${i+1}] **${a.title}**\n    From: ${a.agent} | Priority: ${a.priority}\n    ${a.desc}\n    ID: \`${a.id}\`\n`});
+s+="\nType \`approve all\` to greenlight everything.";
+R.push({a:"Orchestrator",r:"orchestrator",m:s});
+}
+else if(lo==="approve all"){
+let c=0;P.approvals.forEach(a=>{if(a.status==="pending"){a.status="approved";c++}});
+R.push({a:"Orchestrator",r:"orchestrator",m:`**Approved ${c} pending actions.** Team proceeding with execution.`});
+}
+else if(lo.startsWith("approve ")){
+let id=lo.replace("approve ","").trim();let found=P.approvals.find(a=>a.id===id&&a.status==="pending");
+if(found){found.status="approved";R.push({a:"Orchestrator",r:"orchestrator",m:`Approved: **${found.title}**`})}
+else R.push({a:"Orchestrator",r:"orchestrator",m:`No pending approval found for: ${id}`});
+}
+else if(lo.startsWith("reject ")){
+let id=lo.replace("reject ","").trim();let found=P.approvals.find(a=>a.id===id&&a.status==="pending");
+if(found){found.status="rejected";R.push({a:"Orchestrator",r:"orchestrator",m:`Rejected: **${found.title}**`})}
+else R.push({a:"Orchestrator",r:"orchestrator",m:`No pending approval found for: ${id}`});
+}
+else if(lo==="run cycle"){
+P.cycle++;Object.values(P.agents).forEach(a=>a.actions+=Math.floor(Math.random()*5)+1);
+// Move some tasks
+let pending=Object.values(P.taskStatus).filter(t=>t.status==="pending");
+pending.slice(0,3).forEach(t=>t.status="in_progress");
+let active=Object.values(P.taskStatus).filter(t=>t.status==="in_progress");
+if(active.length>3)active.slice(0,1).forEach(t=>t.status="completed");
+let s=`**Cycle #${P.cycle} complete.**\n\nActions executed: ${Math.floor(Math.random()*10)+5}\nPending approval: ${P.approvals.filter(a=>a.status==="pending").length}\n`;
+Object.entries(P.agents).forEach(([k,v])=>s+=`\n  ${k}: ${Math.floor(Math.random()*5)+1} actions proposed`);
+R.push({a:"Orchestrator",r:"orchestrator",m:s});
+}
+else if(lo.startsWith("run ")){
+let agent=lo.replace("run ","").trim();
+if(P.agents[agent]){P.agents[agent].actions+=Math.floor(Math.random()*4)+1;
+R.push({a:P.agents[agent].name,r:agent,m:`${P.agents[agent].name} cycle complete. ${Math.floor(Math.random()*4)+1} actions proposed.\nCapabilities: ${P.agents[agent].caps.join(", ")}`})}
+else R.push({a:"Orchestrator",r:"orchestrator",m:`Unknown agent: ${agent}. Available: strategy, research, operations, forecast, qa, resource`});
+}
+else if(lo==="acp"){
+R.push({a:"Orchestrator",r:"orchestrator",m:`**ACP - External Agent Communication**\n\nRegistered agents: 2\nTotal messages: 2\n\n**External Agents:**\n  **OpenClaw** (openclaw) [registered]\n    Capabilities: legal_research, contract_analysis, compliance_checking\n  **PaperClip** (paperclip) [registered]\n    Capabilities: document_generation, template_management, data_extraction`});
+}
+else{
+R.push({a:"Orchestrator",r:"orchestrator",m:`Message delivered to team: "${m}"`});
+["strategy","research","operations"].forEach(r=>{
+R.push({a:P.agents[r].name,r:r,m:`Acknowledged. Standing by for instructions.`})});
+}
+return R;
+}
+
+function send(){
+const m=inp.value.trim();if(!m)return;inp.value="";
+addMsg("You","user",m,true);
+const typ=showTyping();
+setTimeout(()=>{typ.remove();
+const responses=handle(m);
+responses.forEach((r,i)=>setTimeout(()=>addMsg(r.a,r.r,r.m,false),i*200));
+setTimeout(updPanel,responses.length*200+100);
+},400);
+}
+
+inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
+function sq(c){inp.value=c;send()}
+updPanel();inp.focus();
+</script>
+</body></html>
