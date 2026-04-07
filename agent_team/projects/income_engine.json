@@ -1,0 +1,188 @@
+{
+  "id": "51772ca4af",
+  "name": "\u00a310K Monthly Income Engine",
+  "outline": "Multi-stream income project targeting \u00a310,000/month through:\n\n1. YOUTUBE CHANNEL - Create and publish videos to generate ad revenue, sponsorships, \n   and affiliate income. Target: 300,000-500,000 views/month.\n\n2. INSTAGRAM (AI INFLUENCERS) - Create and publish content using AI-generated \n   influencer personas. Target: 100,000 views/month.\n\n3. TIKTOK (AI INFLUENCERS) - Create and publish short-form content using AI-generated \n   influencer personas. Target: 500,000 views/month.\n\n4. COLLECTIBLES TRADING - Purchase Pokemon, One Piece, and Dragon Ball collectibles \n   at prices that can be resold for profit. Identify limited editions and items that \n   will appreciate in value over time.\n\nEach revenue stream should generate \u00a32,000-\u00a35,000/month.",
+  "status": "active",
+  "created_at": "2026-04-07T17:17:16.992598+00:00",
+  "updated_at": "2026-04-07T17:17:16.992712+00:00",
+  "goals": [
+    {
+      "id": "9c54ece0",
+      "title": "YouTube Revenue Stream",
+      "description": "Build a YouTube channel generating consistent ad revenue, sponsorships and affiliate income through engaging video content",
+      "measurable_target": "\u00a32,000-\u00a35,000/month revenue, 300K-500K views/month",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0,
+      "status": "active"
+    },
+    {
+      "id": "d06955f7",
+      "title": "Instagram AI Influencer Revenue",
+      "description": "Create AI influencer personas on Instagram that generate income through brand deals, affiliate marketing and content monetisation",
+      "measurable_target": "\u00a32,000-\u00a35,000/month revenue, 100K views/month",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0,
+      "status": "active"
+    },
+    {
+      "id": "bf1fe0f7",
+      "title": "TikTok AI Influencer Revenue",
+      "description": "Create AI influencer personas on TikTok that generate income through creator fund, brand deals and affiliate marketing",
+      "measurable_target": "\u00a32,000-\u00a35,000/month revenue, 500K views/month",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0,
+      "status": "active"
+    },
+    {
+      "id": "e6fb2e1f",
+      "title": "Collectibles Trading Profit",
+      "description": "Buy Pokemon, One Piece and Dragon Ball collectibles at wholesale/discounted prices and resell for profit. Identify limited editions with future appreciation potential",
+      "measurable_target": "\u00a32,000-\u00a35,000/month net profit",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0,
+      "status": "active"
+    },
+    {
+      "id": "70893173",
+      "title": "\u00a310K Monthly Income Target",
+      "description": "Achieve combined monthly income of \u00a310,000 across all revenue streams",
+      "measurable_target": "\u00a310,000/month total income",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0,
+      "status": "active"
+    }
+  ],
+  "targets": [
+    {
+      "id": "0b9774fa",
+      "name": "YouTube Monthly Views",
+      "metric": "views_per_month",
+      "current_value": 0.0,
+      "target_value": 400000,
+      "unit": "views",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "f808ff1f",
+      "name": "YouTube Monthly Revenue",
+      "metric": "gbp_per_month",
+      "current_value": 0.0,
+      "target_value": 3500,
+      "unit": "GBP",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "4eb9fa5e",
+      "name": "YouTube Subscribers",
+      "metric": "total_subscribers",
+      "current_value": 0.0,
+      "target_value": 50000,
+      "unit": "subscribers",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "786f3876",
+      "name": "Instagram Monthly Views",
+      "metric": "views_per_month",
+      "current_value": 0.0,
+      "target_value": 100000,
+      "unit": "views",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "a10d47bc",
+      "name": "Instagram Monthly Revenue",
+      "metric": "gbp_per_month",
+      "current_value": 0.0,
+      "target_value": 3500,
+      "unit": "GBP",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "240bb363",
+      "name": "Instagram Followers",
+      "metric": "total_followers",
+      "current_value": 0.0,
+      "target_value": 50000,
+      "unit": "followers",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "c400b198",
+      "name": "TikTok Monthly Views",
+      "metric": "views_per_month",
+      "current_value": 0.0,
+      "target_value": 500000,
+      "unit": "views",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "ce16c6d8",
+      "name": "TikTok Monthly Revenue",
+      "metric": "gbp_per_month",
+      "current_value": 0.0,
+      "target_value": 3500,
+      "unit": "GBP",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "103ee43f",
+      "name": "TikTok Followers",
+      "metric": "total_followers",
+      "current_value": 0.0,
+      "target_value": 100000,
+      "unit": "followers",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "f41b8d5a",
+      "name": "Collectibles Monthly Net Profit",
+      "metric": "gbp_per_month",
+      "current_value": 0.0,
+      "target_value": 3500,
+      "unit": "GBP",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "1b280fa7",
+      "name": "Collectibles Inventory Value",
+      "metric": "gbp_total",
+      "current_value": 0.0,
+      "target_value": 10000,
+      "unit": "GBP",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    },
+    {
+      "id": "914f69b8",
+      "name": "Total Monthly Income",
+      "metric": "gbp_per_month",
+      "current_value": 0.0,
+      "target_value": 10000,
+      "unit": "GBP",
+      "deadline": "2026-10-07",
+      "progress_pct": 0.0
+    }
+  ],
+  "strategies": [],
+  "methods": [],
+  "tasks": [],
+  "performance": [],
+  "forecasts": [],
+  "resources": [],
+  "integrations": [],
+  "research_notes": [],
+  "market_data": [],
+  "tags": [],
+  "config": {}
+}
