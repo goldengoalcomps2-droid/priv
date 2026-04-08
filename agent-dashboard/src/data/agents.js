@@ -1,0 +1,127 @@
+/**
+ * Agent definitions, desk positions, and task pools.
+ */
+
+export const AGENTS = [
+  {
+    id: 'strategy',
+    name: 'Strategos',
+    role: 'Strategist',
+    color: '#8b5cf6',
+    colorBg: 'rgba(139, 92, 246, 0.15)',
+    emoji: '🧠',
+    avatar: 'S',
+    deskX: 120,
+    deskY: 100,
+  },
+  {
+    id: 'research',
+    name: 'Nova',
+    role: 'Researcher',
+    color: '#06b6d4',
+    colorBg: 'rgba(6, 182, 212, 0.15)',
+    emoji: '🔬',
+    avatar: 'R',
+    deskX: 380,
+    deskY: 100,
+  },
+  {
+    id: 'operations',
+    name: 'Forge',
+    role: 'Executor',
+    color: '#10b981',
+    colorBg: 'rgba(16, 185, 129, 0.15)',
+    emoji: '⚡',
+    avatar: 'O',
+    deskX: 640,
+    deskY: 100,
+  },
+  {
+    id: 'forecast',
+    name: 'Oracle',
+    role: 'Forecaster',
+    color: '#f59e0b',
+    colorBg: 'rgba(245, 158, 11, 0.15)',
+    emoji: '🔮',
+    avatar: 'F',
+    deskX: 120,
+    deskY: 300,
+  },
+  {
+    id: 'qa',
+    name: 'Sentinel',
+    role: 'QA Inspector',
+    color: '#ef4444',
+    colorBg: 'rgba(239, 68, 68, 0.15)',
+    emoji: '🛡️',
+    avatar: 'Q',
+    deskX: 380,
+    deskY: 300,
+  },
+  {
+    id: 'resource',
+    name: 'Atlas',
+    role: 'Resource Scout',
+    color: '#f97316',
+    colorBg: 'rgba(249, 115, 22, 0.15)',
+    emoji: '🧭',
+    avatar: 'A',
+    deskX: 640,
+    deskY: 300,
+  },
+];
+
+export const TASKS = {
+  strategy: [
+    'Designing YouTube growth strategy',
+    'Planning Instagram persona rollout',
+    'Refining cross-stream synergy model',
+    'Building TikTok content framework',
+    'Analysing revenue diversification',
+  ],
+  research: [
+    'Scanning Pokemon TCG price trends',
+    'Analysing AI influencer market data',
+    'Benchmarking competitor channels',
+    'Mining TikTok engagement patterns',
+    'Evaluating collectibles ROI models',
+  ],
+  operations: [
+    'Executing content pipeline tasks',
+    'Publishing scheduled YouTube batch',
+    'Processing eBay listing queue',
+    'Running Instagram post scheduler',
+    'Coordinating TikTok uploads',
+  ],
+  forecast: [
+    'Projecting Q3 revenue trajectory',
+    'Modelling subscriber growth curves',
+    'Forecasting inventory demand',
+    'Running scenario simulations',
+    'Calculating capacity projections',
+  ],
+  qa: [
+    'Validating content quality scores',
+    'Testing platform integrations',
+    'Auditing goal alignment matrix',
+    'Reviewing compliance checklist',
+    'Checking output consistency',
+  ],
+  resource: [
+    'Evaluating ElevenLabs voice models',
+    'Scouting wholesale card distributors',
+    'Assessing Flux LoRA training options',
+    'Comparing analytics platforms',
+    'Reviewing TikTok Shop integration',
+  ],
+  default: ['Processing task', 'Analysing data', 'Generating report'],
+};
+
+export const COLLAB_PAIRS = [
+  ['strategy', 'research'],
+  ['strategy', 'forecast'],
+  ['operations', 'qa'],
+  ['research', 'resource'],
+  ['forecast', 'qa'],
+  ['operations', 'resource'],
+];
