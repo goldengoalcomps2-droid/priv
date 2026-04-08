@@ -1,0 +1,813 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xmeml>
+<xmeml version="5">
+  <project>
+    <name>Tokyo Twilight (東京暮色) - Yasujiro Ozu 1957</name>
+    <children>
+      <sequence>
+        <name>Tokyo Twilight (東京暮色) - Yasujiro Ozu 1957 - Main Edit</name>
+        <duration>203040</duration>
+        <rate>
+          <timebase>24</timebase>
+          <ntsc>FALSE</ntsc>
+        </rate>
+        <timecode>
+          <rate>
+            <timebase>24</timebase>
+          </rate>
+          <string>00:00:00:00</string>
+          <frame>0</frame>
+        </timecode>
+        <media>
+          <video>
+            <format>
+              <samplecharacteristics>
+                <width>720</width>
+                <height>480</height>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+              </samplecharacteristics>
+            </format>
+            <track>
+              <clipitem id="scene_1">
+                <name>Scene 1: Opening credits and establishing shots - winter To</name>
+                <duration>4320</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>0</start>
+                <end>4320</end>
+                <in>0</in>
+                <out>4320</out>
+                <marker>
+                  <name>Scene 1</name>
+                  <comment>Opening credits and establishing shots - winter Tokyo streets, train stations, Ozu's signature pillow shots of urban landscapes at dusk</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_2">
+                <name>Scene 2: Introduction of Shukichi (father/bank executive) a</name>
+                <duration>7200</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>4320</start>
+                <end>11520</end>
+                <in>0</in>
+                <out>7200</out>
+                <marker>
+                  <name>Scene 2</name>
+                  <comment>Introduction of Shukichi (father/bank executive) at home. Establishing the family house interior - tatami-level camera, minimalist composition</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_3">
+                <name>Scene 3: Akiko (younger sister) at college studying English</name>
+                <duration>10080</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>11520</start>
+                <end>21600</end>
+                <in>0</in>
+                <out>10080</out>
+                <marker>
+                  <name>Scene 3</name>
+                  <comment>Akiko (younger sister) at college studying English shorthand. Scenes with classmates. First hints of her relationship with Kenji</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_4">
+                <name>Scene 4: Takako (elder sister, Setsuko Hara) returns home f</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>21600</start>
+                <end>36000</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 4</name>
+                  <comment>Takako (elder sister, Setsuko Hara) returns home from unhappy marriage with her toddler daughter. Conversation with father about marital problems</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_5">
+                <name>Scene 5: Night scenes in seedy bars and hangouts. Akiko mee</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>36000</start>
+                <end>50400</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 5</name>
+                  <comment>Night scenes in seedy bars and hangouts. Akiko meets Kenji. Shadow-laden expressionistic lighting - departure from Ozu's typical even exposure</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_6">
+                <name>Scene 6: Family dinner scenes. Tension between sisters. Dis</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>50400</start>
+                <end>64800</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 6</name>
+                  <comment>Family dinner scenes. Tension between sisters. Discussion of their mother who abandoned them. Low-angle static camera compositions</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_7">
+                <name>Scene 7: Akiko discovers she is pregnant. Internal turmoil.</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>64800</start>
+                <end>79200</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 7</name>
+                  <comment>Akiko discovers she is pregnant. Internal turmoil. Scenes at college contrasted with night wandering through Tokyo streets</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_8">
+                <name>Scene 8: Akiko confronts Kenji about the pregnancy. He is e</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>79200</start>
+                <end>93600</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 8</name>
+                  <comment>Akiko confronts Kenji about the pregnancy. He is evasive and cold. Bar scenes with harsh lighting and dark shadows</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_9">
+                <name>Scene 9: The sisters learn of their mother Kisako's existen</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>93600</start>
+                <end>108000</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 9</name>
+                  <comment>The sisters learn of their mother Kisako's existence in Tokyo. Emotional turmoil. Pillow shots of empty train stations and twilight streets</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_10">
+                <name>Scene 10: Meeting with the absent mother Kisako. Confrontati</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>108000</start>
+                <end>122400</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 10</name>
+                  <comment>Meeting with the absent mother Kisako. Confrontation scene. Complex emotions of abandonment and resentment</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_11">
+                <name>Scene 11: Takako grapples with her own marriage paralleling </name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>122400</start>
+                <end>136800</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 11</name>
+                  <comment>Takako grapples with her own marriage paralleling her mother's abandonment. Scenes with her toddler daughter</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_12">
+                <name>Scene 12: Akiko decides to get an abortion after realizing K</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>136800</start>
+                <end>151200</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 12</name>
+                  <comment>Akiko decides to get an abortion after realizing Kenji does not love her. Hospital/clinic scenes. Stark, unflinching portrayal</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_13">
+                <name>Scene 13: Aftermath of abortion. Akiko's emotional state det</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>151200</start>
+                <end>165600</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 13</name>
+                  <comment>Aftermath of abortion. Akiko's emotional state deteriorates. Father Shukichi begins to understand the depth of his daughters' pain</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_14">
+                <name>Scene 14: Takako makes decisions about her marriage. Paralle</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>165600</start>
+                <end>180000</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 14</name>
+                  <comment>Takako makes decisions about her marriage. Parallel with her mother's past choices. Winter imagery intensifies</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_15">
+                <name>Scene 15: Resolution scenes. Family confronts their shared p</name>
+                <duration>14400</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>180000</start>
+                <end>194400</end>
+                <in>0</in>
+                <out>14400</out>
+                <marker>
+                  <name>Scene 15</name>
+                  <comment>Resolution scenes. Family confronts their shared pain. Ozu's restrained emotional style - feelings expressed through silence and composition</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="scene_16">
+                <name>Scene 16: Final sequence. Empty streets at twilight. Ozu's p</name>
+                <duration>8640</duration>
+                <rate>
+                  <timebase>24</timebase>
+                </rate>
+                <start>194400</start>
+                <end>203040</end>
+                <in>0</in>
+                <out>8640</out>
+                <marker>
+                  <name>Scene 16</name>
+                  <comment>Final sequence. Empty streets at twilight. Ozu's pillow shots bookend the film. Credits roll over winter Tokyo</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+            </track>
+            <track>
+              <generatoritem id="title_1">
+                <name>Title: Opening credits and establishing shots -</name>
+                <duration>72</duration>
+                <start>0</start>
+                <end>72</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Opening credits and establishing shots -</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_2">
+                <name>Title: Introduction of Shukichi (father/bank ex</name>
+                <duration>72</duration>
+                <start>4320</start>
+                <end>4392</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Introduction of Shukichi (father/bank ex</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_3">
+                <name>Title: Akiko (younger sister) at college studyi</name>
+                <duration>72</duration>
+                <start>11520</start>
+                <end>11592</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Akiko (younger sister) at college studyi</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_4">
+                <name>Title: Takako (elder sister, Setsuko Hara) retu</name>
+                <duration>72</duration>
+                <start>21600</start>
+                <end>21672</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Takako (elder sister, Setsuko Hara) retu</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_5">
+                <name>Title: Night scenes in seedy bars and hangouts.</name>
+                <duration>72</duration>
+                <start>36000</start>
+                <end>36072</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Night scenes in seedy bars and hangouts.</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_6">
+                <name>Title: Family dinner scenes. Tension between si</name>
+                <duration>72</duration>
+                <start>50400</start>
+                <end>50472</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Family dinner scenes. Tension between si</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_7">
+                <name>Title: Akiko discovers she is pregnant. Interna</name>
+                <duration>72</duration>
+                <start>64800</start>
+                <end>64872</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Akiko discovers she is pregnant. Interna</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_8">
+                <name>Title: Akiko confronts Kenji about the pregnanc</name>
+                <duration>72</duration>
+                <start>79200</start>
+                <end>79272</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Akiko confronts Kenji about the pregnanc</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_9">
+                <name>Title: The sisters learn of their mother Kisako</name>
+                <duration>72</duration>
+                <start>93600</start>
+                <end>93672</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>The sisters learn of their mother Kisako</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_10">
+                <name>Title: Meeting with the absent mother Kisako. C</name>
+                <duration>72</duration>
+                <start>108000</start>
+                <end>108072</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Meeting with the absent mother Kisako. C</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_11">
+                <name>Title: Takako grapples with her own marriage pa</name>
+                <duration>72</duration>
+                <start>122400</start>
+                <end>122472</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Takako grapples with her own marriage pa</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_12">
+                <name>Title: Akiko decides to get an abortion after r</name>
+                <duration>72</duration>
+                <start>136800</start>
+                <end>136872</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Akiko decides to get an abortion after r</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_13">
+                <name>Title: Aftermath of abortion. Akiko's emotional</name>
+                <duration>72</duration>
+                <start>151200</start>
+                <end>151272</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Aftermath of abortion. Akiko's emotional</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_14">
+                <name>Title: Takako makes decisions about her marriag</name>
+                <duration>72</duration>
+                <start>165600</start>
+                <end>165672</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Takako makes decisions about her marriag</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_15">
+                <name>Title: Resolution scenes. Family confronts thei</name>
+                <duration>72</duration>
+                <start>180000</start>
+                <end>180072</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Resolution scenes. Family confronts thei</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+              <generatoritem id="title_16">
+                <name>Title: Final sequence. Empty streets at twiligh</name>
+                <duration>72</duration>
+                <start>194400</start>
+                <end>194472</end>
+                <effect>
+                  <name>Text</name>
+                  <effectid>Text</effectid>
+                  <effecttype>generator</effecttype>
+                  <parameter>
+                    <parameterid>str</parameterid>
+                    <name>Text</name>
+                    <value>Final sequence. Empty streets at twiligh</value>
+                  </parameter>
+                </effect>
+              </generatoritem>
+            </track>
+          </video>
+          <audio>
+            <track>
+              <clipitem id="audio_seg_0">
+                <name>[Opening credits - no dialogue]</name>
+                <start>0</start>
+                <end>4320</end>
+                <duration>4320</duration>
+                <marker>
+                  <name>[Opening credits - no dialogue</name>
+                  <comment>[Opening credits - no dialogue]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_1">
+                <name>[Father Shukichi establishing scenes - Japanese di</name>
+                <start>4320</start>
+                <end>11520</end>
+                <duration>7200</duration>
+                <marker>
+                  <name>[Father Shukichi establishing </name>
+                  <comment>[Father Shukichi establishing scenes - Japanese dialogue]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_2">
+                <name>[Akiko at college - conversations with classmates]</name>
+                <start>11520</start>
+                <end>21600</end>
+                <duration>10080</duration>
+                <marker>
+                  <name>[Akiko at college - conversati</name>
+                  <comment>[Akiko at college - conversations with classmates]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_3">
+                <name>[Takako returns home - discussion of marriage]</name>
+                <start>21600</start>
+                <end>36000</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Takako returns home - discuss</name>
+                  <comment>[Takako returns home - discussion of marriage]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_4">
+                <name>[Night bar scenes - Akiko and Kenji]</name>
+                <start>36000</start>
+                <end>50400</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Night bar scenes - Akiko and </name>
+                  <comment>[Night bar scenes - Akiko and Kenji]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_5">
+                <name>[Family dinner - tension about absent mother]</name>
+                <start>50400</start>
+                <end>64800</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Family dinner - tension about</name>
+                  <comment>[Family dinner - tension about absent mother]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_6">
+                <name>[Akiko discovers pregnancy]</name>
+                <start>64800</start>
+                <end>79200</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Akiko discovers pregnancy]</name>
+                  <comment>[Akiko discovers pregnancy]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_7">
+                <name>[Confrontation with Kenji]</name>
+                <start>79200</start>
+                <end>93600</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Confrontation with Kenji]</name>
+                  <comment>[Confrontation with Kenji]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_8">
+                <name>[Discovery of mother Kisako]</name>
+                <start>93600</start>
+                <end>108000</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Discovery of mother Kisako]</name>
+                  <comment>[Discovery of mother Kisako]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_9">
+                <name>[Meeting with absent mother]</name>
+                <start>108000</start>
+                <end>122400</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Meeting with absent mother]</name>
+                  <comment>[Meeting with absent mother]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_10">
+                <name>[Takako's marriage parallels]</name>
+                <start>122400</start>
+                <end>136800</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Takako's marriage parallels]</name>
+                  <comment>[Takako's marriage parallels]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_11">
+                <name>[Akiko's abortion decision]</name>
+                <start>136800</start>
+                <end>151200</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Akiko's abortion decision]</name>
+                  <comment>[Akiko's abortion decision]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_12">
+                <name>[Aftermath and emotional fallout]</name>
+                <start>151200</start>
+                <end>165600</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Aftermath and emotional fallo</name>
+                  <comment>[Aftermath and emotional fallout]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_13">
+                <name>[Resolution and family reckoning]</name>
+                <start>165600</start>
+                <end>180000</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Resolution and family reckoni</name>
+                  <comment>[Resolution and family reckoning]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_14">
+                <name>[Final sequence - restrained emotion]</name>
+                <start>180000</start>
+                <end>194400</end>
+                <duration>14400</duration>
+                <marker>
+                  <name>[Final sequence - restrained e</name>
+                  <comment>[Final sequence - restrained emotion]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+              <clipitem id="audio_seg_15">
+                <name>[Closing pillow shots and credits]</name>
+                <start>194400</start>
+                <end>203040</end>
+                <duration>8640</duration>
+                <marker>
+                  <name>[Closing pillow shots and cred</name>
+                  <comment>[Closing pillow shots and credits]</comment>
+                  <in>0</in>
+                </marker>
+              </clipitem>
+            </track>
+          </audio>
+        </media>
+        <marker>
+          <name>Scene 1</name>
+          <comment>Opening credits and establishing shots - winter Tokyo streets, train stations, Ozu's signature pillow shots of urban landscapes at dusk</comment>
+          <in>0</in>
+        </marker>
+        <marker>
+          <name>Scene 2</name>
+          <comment>Introduction of Shukichi (father/bank executive) at home. Establishing the family house interior - tatami-level camera, minimalist composition</comment>
+          <in>4320</in>
+        </marker>
+        <marker>
+          <name>Scene 3</name>
+          <comment>Akiko (younger sister) at college studying English shorthand. Scenes with classmates. First hints of her relationship with Kenji</comment>
+          <in>11520</in>
+        </marker>
+        <marker>
+          <name>Scene 4</name>
+          <comment>Takako (elder sister, Setsuko Hara) returns home from unhappy marriage with her toddler daughter. Conversation with father about marital problems</comment>
+          <in>21600</in>
+        </marker>
+        <marker>
+          <name>Scene 5</name>
+          <comment>Night scenes in seedy bars and hangouts. Akiko meets Kenji. Shadow-laden expressionistic lighting - departure from Ozu's typical even exposure</comment>
+          <in>36000</in>
+        </marker>
+        <marker>
+          <name>Scene 6</name>
+          <comment>Family dinner scenes. Tension between sisters. Discussion of their mother who abandoned them. Low-angle static camera compositions</comment>
+          <in>50400</in>
+        </marker>
+        <marker>
+          <name>Scene 7</name>
+          <comment>Akiko discovers she is pregnant. Internal turmoil. Scenes at college contrasted with night wandering through Tokyo streets</comment>
+          <in>64800</in>
+        </marker>
+        <marker>
+          <name>Scene 8</name>
+          <comment>Akiko confronts Kenji about the pregnancy. He is evasive and cold. Bar scenes with harsh lighting and dark shadows</comment>
+          <in>79200</in>
+        </marker>
+        <marker>
+          <name>Scene 9</name>
+          <comment>The sisters learn of their mother Kisako's existence in Tokyo. Emotional turmoil. Pillow shots of empty train stations and twilight streets</comment>
+          <in>93600</in>
+        </marker>
+        <marker>
+          <name>Scene 10</name>
+          <comment>Meeting with the absent mother Kisako. Confrontation scene. Complex emotions of abandonment and resentment</comment>
+          <in>108000</in>
+        </marker>
+        <marker>
+          <name>Scene 11</name>
+          <comment>Takako grapples with her own marriage paralleling her mother's abandonment. Scenes with her toddler daughter</comment>
+          <in>122400</in>
+        </marker>
+        <marker>
+          <name>Scene 12</name>
+          <comment>Akiko decides to get an abortion after realizing Kenji does not love her. Hospital/clinic scenes. Stark, unflinching portrayal</comment>
+          <in>136800</in>
+        </marker>
+        <marker>
+          <name>Scene 13</name>
+          <comment>Aftermath of abortion. Akiko's emotional state deteriorates. Father Shukichi begins to understand the depth of his daughters' pain</comment>
+          <in>151200</in>
+        </marker>
+        <marker>
+          <name>Scene 14</name>
+          <comment>Takako makes decisions about her marriage. Parallel with her mother's past choices. Winter imagery intensifies</comment>
+          <in>165600</in>
+        </marker>
+        <marker>
+          <name>Scene 15</name>
+          <comment>Resolution scenes. Family confronts their shared pain. Ozu's restrained emotional style - feelings expressed through silence and composition</comment>
+          <in>180000</in>
+        </marker>
+        <marker>
+          <name>Scene 16</name>
+          <comment>Final sequence. Empty streets at twilight. Ozu's pillow shots bookend the film. Credits roll over winter Tokyo</comment>
+          <in>194400</in>
+        </marker>
+      </sequence>
+    </children>
+  </project>
+</xmeml>

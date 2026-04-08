@@ -1,0 +1,114 @@
+STORYBOARD: Tokyo Twilight (東京暮色) - Yasujiro Ozu 1957
+Source: https://www.youtube.com/watch?v=yZ3M8-d1QU4
+Channel: Public Domain Cinema
+Duration: 8460s | Resolution: 720x480 | FPS: 24
+Pacing: slow (avg scene: 528.75s)
+
+============================================================
+SCENES
+============================================================
+
+SCENE 1 [0:00 - 3:00]
+  Duration: 180.0s
+  Content: Opening credits and establishing shots - winter Tokyo streets, train stations, Ozu's signature pillow shots of urban landscapes at dusk
+
+SCENE 2 [3:00 - 8:00]
+  Duration: 300.0s
+  Content: Introduction of Shukichi (father/bank executive) at home. Establishing the family house interior - tatami-level camera, minimalist composition
+
+SCENE 3 [8:00 - 15:00]
+  Duration: 420.0s
+  Content: Akiko (younger sister) at college studying English shorthand. Scenes with classmates. First hints of her relationship with Kenji
+
+SCENE 4 [15:00 - 25:00]
+  Duration: 600.0s
+  Content: Takako (elder sister, Setsuko Hara) returns home from unhappy marriage with her toddler daughter. Conversation with father about marital problems
+
+SCENE 5 [25:00 - 35:00]
+  Duration: 600.0s
+  Content: Night scenes in seedy bars and hangouts. Akiko meets Kenji. Shadow-laden expressionistic lighting - departure from Ozu's typical even exposure
+
+SCENE 6 [35:00 - 45:00]
+  Duration: 600.0s
+  Content: Family dinner scenes. Tension between sisters. Discussion of their mother who abandoned them. Low-angle static camera compositions
+
+SCENE 7 [45:00 - 55:00]
+  Duration: 600.0s
+  Content: Akiko discovers she is pregnant. Internal turmoil. Scenes at college contrasted with night wandering through Tokyo streets
+
+SCENE 8 [55:00 - 1:05:00]
+  Duration: 600.0s
+  Content: Akiko confronts Kenji about the pregnancy. He is evasive and cold. Bar scenes with harsh lighting and dark shadows
+
+SCENE 9 [1:05:00 - 1:15:00]
+  Duration: 600.0s
+  Content: The sisters learn of their mother Kisako's existence in Tokyo. Emotional turmoil. Pillow shots of empty train stations and twilight streets
+
+SCENE 10 [1:15:00 - 1:25:00]
+  Duration: 600.0s
+  Content: Meeting with the absent mother Kisako. Confrontation scene. Complex emotions of abandonment and resentment
+
+SCENE 11 [1:25:00 - 1:35:00]
+  Duration: 600.0s
+  Content: Takako grapples with her own marriage paralleling her mother's abandonment. Scenes with her toddler daughter
+
+SCENE 12 [1:35:00 - 1:45:00]
+  Duration: 600.0s
+  Content: Akiko decides to get an abortion after realizing Kenji does not love her. Hospital/clinic scenes. Stark, unflinching portrayal
+
+SCENE 13 [1:45:00 - 1:55:00]
+  Duration: 600.0s
+  Content: Aftermath of abortion. Akiko's emotional state deteriorates. Father Shukichi begins to understand the depth of his daughters' pain
+
+SCENE 14 [1:55:00 - 2:05:00]
+  Duration: 600.0s
+  Content: Takako makes decisions about her marriage. Parallel with her mother's past choices. Winter imagery intensifies
+
+SCENE 15 [2:05:00 - 2:15:00]
+  Duration: 600.0s
+  Content: Resolution scenes. Family confronts their shared pain. Ozu's restrained emotional style - feelings expressed through silence and composition
+
+SCENE 16 [2:15:00 - 2:21:00]
+  Duration: 360.0s
+  Content: Final sequence. Empty streets at twilight. Ozu's pillow shots bookend the film. Credits roll over winter Tokyo
+
+============================================================
+FULL TRANSCRIPT
+============================================================
+
+[Full transcript not available - Japanese language dialogue. Film follows two sisters in 1950s Tokyo dealing with absent mother, unwanted pregnancy, and marital discord.]
+
+============================================================
+STYLE NOTES
+============================================================
+
+Visual Style: Black & White, Expressionistic shadow-laden photography
+Cinematographer: Yuharu Atsuta
+Camera: Ozu's signature tatami-level static camera (low angle, no movement)
+Composition: Minimalist, geometric framing, symmetrical
+Lighting: Deliberately dark for night scenes - unusual for Ozu. Harsh bar lighting contrasts with soft domestic scenes
+Transitions: Ozu's trademark "pillow shots" - uninhabited compositions of train stations, streets, cafes
+Setting: Winter Tokyo - bars, family home, college, streets at dusk
+Tone: Bleak, melancholic, restrained emotional expression
+Format: Extended drama (141 min) - Ozu's longest film
+Color: Final B&W Ozu film - all subsequent were colour
+Key visual motifs: Trains, twilight streets, empty corridors, sake bottles, tatami mats
+
+============================================================
+RECREATION INSTRUCTIONS
+============================================================
+
+BLENDER:
+  1. Open Blender
+  2. Go to Scripting workspace
+  3. Open: 
+  4. Click Run Script
+  5. Customise text objects and add your media
+  6. Render: Render > Render Animation
+
+PREMIERE PRO:
+  1. Open Premiere Pro
+  2. File > Import > 
+  3. Sequence and markers will be created
+  4. Replace placeholder clips with your footage
+  5. Adjust titles and transitions
