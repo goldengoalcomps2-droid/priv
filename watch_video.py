@@ -16,6 +16,7 @@ Tell Claude: "look at the frames in agent_team/video_frames/<video_id>/"
 import os
 import sys
 import json
+import shutil
 import subprocess
 import hashlib
 import re
@@ -25,6 +26,13 @@ from pathlib import Path
 def get_vid_id(url):
     match = re.search(r'(?:v=|youtu\.be/)([a-zA-Z0-9_-]{11})', url)
     return match.group(1) if match else hashlib.md5(url.encode()).hexdigest()[:11]
+
+
+def yt_dlp_cmd():
+    """Find yt-dlp: try binary first, fall back to python -m yt_dlp."""
+    if shutil.which("yt-dlp"):
+        return ["yt-dlp"]
+    return [sys.executable, "-m", "yt_dlp"]
 
 
 def main():
@@ -69,7 +77,7 @@ def main():
     meta = {}
     try:
         result = subprocess.run(
-            ["yt-dlp", "--dump-json", "--no-download", url],
+            [*yt_dlp_cmd(), "--dump-json", "--no-download", url],
             capture_output=True, text=True, timeout=60
         )
         if result.returncode == 0:
@@ -96,7 +104,7 @@ def main():
     if not video_path.exists():
         try:
             subprocess.run(
-                ["yt-dlp", "-f", "bestvideo[height<=720]+bestaudio/best[height<=720]",
+                [*yt_dlp_cmd(), "-f", "bestvideo[height<=720]+bestaudio/best[height<=720]",
                  "--merge-output-format", "mp4",
                  "-o", str(video_path), url],
                 capture_output=True, timeout=600
