@@ -188,11 +188,16 @@ echo "Step 4: Checking cron jobs..."
 if [ -f "$CRON_JOBS" ]; then
     if grep -q "anthropic/" "$CRON_JOBS"; then
         cp "$CRON_JOBS" "${CRON_JOBS}.backup.$(date +%Y%m%d_%H%M%S)"
-        sed -i 's|"anthropic/claude-opus-4-6"|"claude-cli/claude-opus-4-6"|g' "$CRON_JOBS"
-        sed -i 's|"anthropic/claude-sonnet-4-6"|"claude-cli/claude-sonnet-4-6"|g' "$CRON_JOBS"
-        sed -i 's|"anthropic/claude-sonnet-4-20250514"|"claude-cli/claude-sonnet-4-6"|g' "$CRON_JOBS"
-        sed -i 's|"anthropic/claude-haiku-4-5"|"claude-cli/claude-haiku-4-5"|g' "$CRON_JOBS"
-        sed -i 's|"anthropic/claude-haiku-4-0"|"claude-cli/claude-haiku-4-5"|g' "$CRON_JOBS"
+        if [[ "$(uname)" == "Darwin" ]]; then
+            SED_INPLACE=(sed -i '')
+        else
+            SED_INPLACE=(sed -i)
+        fi
+        "${SED_INPLACE[@]}" 's|"anthropic/claude-opus-4-6"|"claude-cli/claude-opus-4-6"|g' "$CRON_JOBS"
+        "${SED_INPLACE[@]}" 's|"anthropic/claude-sonnet-4-6"|"claude-cli/claude-sonnet-4-6"|g' "$CRON_JOBS"
+        "${SED_INPLACE[@]}" 's|"anthropic/claude-sonnet-4-20250514"|"claude-cli/claude-sonnet-4-6"|g' "$CRON_JOBS"
+        "${SED_INPLACE[@]}" 's|"anthropic/claude-haiku-4-5"|"claude-cli/claude-haiku-4-5"|g' "$CRON_JOBS"
+        "${SED_INPLACE[@]}" 's|"anthropic/claude-haiku-4-0"|"claude-cli/claude-haiku-4-5"|g' "$CRON_JOBS"
         info "Cron jobs updated"
     else
         info "No anthropic/ references in cron jobs"
