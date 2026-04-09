@@ -29,12 +29,130 @@ from datetime import datetime
 from collections import Counter
 
 
+class ObjectDetector:
+    """Detects objects in frames using YOLO - runs locally, no API."""
+
+    def __init__(self):
+        self.model = None
+        self._load_model()
+
+    def _load_model(self):
+        try:
+            from ultralytics import YOLO
+            self.model = YOLO("yolo11n.pt")  # Nano model - fast, ~6MB
+            print("  ✓ YOLO object detection loaded")
+        except ImportError:
+            print("  ! YOLO not installed (pip install ultralytics) - object detection disabled")
+        except Exception as e:
+            print(f"  ! YOLO load failed: {e} - object detection disabled")
+
+    def detect(self, frame_path: str, width: int, height: int) -> dict:
+        """Detect objects in a frame and return structured results."""
+        if not self.model:
+            return {"objects": [], "scene_type": "unknown", "description": ""}
+
+        results = self.model(frame_path, verbose=False, conf=0.3)
+
+        objects = []
+        object_counts = Counter()
+
+        for r in results:
+            for box in r.boxes:
+                cls_id = int(box.cls[0])
+                cls_name = r.names[cls_id]
+                conf = float(box.conf[0])
+                x1, y1, x2, y2 = box.xyxy[0].tolist()
+
+                # Calculate position in frame
+                cx = (x1 + x2) / 2 / width
+                cy = (y1 + y2) / 2 / height
+                obj_w = (x2 - x1) / width
+                obj_h = (y2 - y1) / height
+
+                position = self._describe_position(cx, cy)
+                size = "large" if obj_w * obj_h > 0.15 else "medium" if obj_w * obj_h > 0.03 else "small"
+
+                objects.append({
+                    "name": cls_name,
+                    "confidence": round(conf, 2),
+                    "position": position,
+                    "size": size,
+                    "center_x": round(cx, 2),
+                    "center_y": round(cy, 2),
+                    "width_pct": round(obj_w * 100, 1),
+                    "height_pct": round(obj_h * 100, 1),
+                })
+                object_counts[cls_name] += 1
+
+        scene_type = self._classify_scene(object_counts, objects)
+
+        description_parts = []
+        for name, count in object_counts.most_common(10):
+            if count > 1:
+                description_parts.append(f"{count} {name}s")
+            else:
+                obj = next(o for o in objects if o["name"] == name)
+                description_parts.append(f"{name} ({obj['position']}, {obj['size']})")
+
+        return {
+            "objects": objects,
+            "object_summary": dict(object_counts.most_common(10)),
+            "total_objects": len(objects),
+            "scene_type": scene_type,
+            "description": ", ".join(description_parts) if description_parts else "No objects detected (may be abstract/ambient scene)",
+        }
+
+    def _describe_position(self, cx: float, cy: float) -> str:
+        """Describe where in the frame an object is."""
+        h = "left" if cx < 0.33 else "right" if cx > 0.66 else "center"
+        v = "top" if cy < 0.33 else "bottom" if cy > 0.66 else "middle"
+        if h == "center" and v == "middle":
+            return "center"
+        return f"{v}-{h}"
+
+    def _classify_scene(self, counts: Counter, objects: list) -> str:
+        """Classify the type of scene based on detected objects."""
+        names = set(counts.keys())
+
+        if names & {"person", "tie", "handbag"} and len(names & {"person"}) > 0:
+            if counts.get("person", 0) > 3:
+                return "crowd/group scene"
+            return "person/portrait scene"
+
+        if names & {"car", "truck", "bus", "motorcycle", "traffic light"}:
+            return "street/urban scene"
+
+        if names & {"sports ball", "tennis racket", "baseball bat", "skateboard", "surfboard"}:
+            return "sports scene"
+
+        if names & {"chair", "couch", "bed", "dining table", "tv", "laptop"}:
+            return "interior/room scene"
+
+        if names & {"boat", "airplane", "train"}:
+            return "transport scene"
+
+        if names & {"dog", "cat", "bird", "horse", "cow", "sheep"}:
+            return "nature/animal scene"
+
+        if names & {"bottle", "wine glass", "cup", "fork", "knife", "bowl"}:
+            return "food/dining scene"
+
+        if names & {"potted plant", "vase"}:
+            return "indoor/lifestyle scene"
+
+        if len(objects) == 0:
+            return "ambient/abstract scene (no recognisable objects)"
+
+        return "general scene"
+
+
 class FrameAnalyser:
-    """Analyses individual frames using Pillow - no API needed."""
+    """Analyses individual frames using Pillow + YOLO - no API needed."""
 
     def __init__(self):
         from PIL import Image
         self.Image = Image
+        self.detector = ObjectDetector()
 
     def analyse(self, frame_path: str, timestamp: float, index: int) -> dict:
         """Extract everything we can see from a single frame."""
@@ -48,6 +166,9 @@ class FrameAnalyser:
             "timestamp_str": f"{int(timestamp)//60}:{int(timestamp)%60:02d}",
             "resolution": f"{width}x{height}",
         }
+
+        # YOLO object detection - what's actually IN the frame
+        result["objects"] = self.detector.detect(frame_path, width, height)
 
         # Color analysis
         result["colors"] = self._analyse_colors(pixels, img)
@@ -326,9 +447,15 @@ class FrameAnalyser:
         l = analysis["lighting"]
         comp = analysis["composition"]
         cpx = analysis["complexity"]
+        obj = analysis.get("objects", {})
 
-        # Build description
         parts = []
+
+        # Objects detected (most important - what's actually in the frame)
+        if obj.get("description"):
+            parts.append(f"Objects: {obj['description']}")
+        if obj.get("scene_type") and obj["scene_type"] != "unknown":
+            parts.append(f"Scene type: {obj['scene_type']}")
 
         # Lighting
         parts.append(f"Lighting: {l['brightness']}, {l['contrast']}")
@@ -654,6 +781,23 @@ class VideoWatcher:
         scene_durations = [s.get("duration", 0) for s in scenes]
         avg_scene = sum(scene_durations) / len(scene_durations) if scene_durations else 0
 
+        # Aggregate detected objects across all frames
+        all_objects = Counter()
+        scene_types = Counter()
+        for fa in frame_analyses:
+            obj_data = fa.get("objects", {})
+            for name, count in obj_data.get("object_summary", {}).items():
+                all_objects[name] += count
+            st = obj_data.get("scene_type", "")
+            if st:
+                scene_types[st] += 1
+
+        top_objects = all_objects.most_common(15)
+        primary_scene = scene_types.most_common(1)[0][0] if scene_types else "unknown"
+
+        # Build video type classification
+        video_type = self._classify_video_type(all_objects, primary_scene, avg_bright, dominant_warmth, len(scenes))
+
         return {
             "dominant_colors": [{"color": c, "frequency": f} for c, f in color_freq],
             "overall_brightness": round(avg_bright, 1),
@@ -665,7 +809,39 @@ class VideoWatcher:
             "avg_scene_duration": round(avg_scene, 1),
             "pacing": "fast" if avg_scene < 5 else "medium" if avg_scene < 15 else "slow",
             "has_text_overlays": any(fa.get("has_text_overlay") for fa in frame_analyses),
+            "detected_objects": [{"name": n, "total_detections": c} for n, c in top_objects],
+            "primary_scene_type": primary_scene,
+            "video_type": video_type,
         }
+
+    def _classify_video_type(self, objects: Counter, scene_type: str,
+                              brightness: float, warmth: str, num_scenes: int) -> str:
+        """Classify the overall video type from aggregated data."""
+        obj_names = set(objects.keys())
+
+        if num_scenes <= 2 and brightness < 80:
+            return "ambience / mood video (dark, minimal scene changes)"
+        if num_scenes <= 2 and brightness >= 80:
+            return "ambience / looping video (static or slow)"
+
+        if obj_names & {"sports ball", "tennis racket", "baseball bat", "skateboard"}:
+            return "sports / action video"
+        if objects.get("person", 0) > 50:
+            return "people-focused video (vlog, interview, or crowd)"
+        if objects.get("person", 0) > 10:
+            return "video with people (tutorial, talking head, or narrative)"
+
+        if obj_names & {"car", "truck", "bus", "traffic light"}:
+            return "urban / driving / city video"
+        if obj_names & {"laptop", "keyboard", "mouse", "cell phone", "tv"}:
+            return "tech / tutorial / screen-based video"
+        if obj_names & {"dog", "cat", "bird", "horse"}:
+            return "nature / animal video"
+
+        if num_scenes > 10:
+            return "fast-paced / montage video"
+
+        return f"general video ({scene_type})"
 
     def _format_report(self, report: dict) -> str:
         """Format as human-readable text report."""
@@ -694,8 +870,32 @@ class VideoWatcher:
             f"  Pacing:     {style.get('pacing', '?')} ({style.get('total_scenes', 0)} scenes, avg {style.get('avg_scene_duration', 0)}s each)",
             f"  Text/titles:{' YES' if style.get('has_text_overlays') else ' No'}",
             "",
-            f"  Dominant colors:",
+            f"  VIDEO TYPE: {style.get('video_type', 'unknown')}",
+            f"  Scene type: {style.get('primary_scene_type', 'unknown')}",
+            "",
         ]
+
+        # Objects detected
+        detected = style.get("detected_objects", [])
+        if detected:
+            lines.extend([
+                "-" * 70,
+                "  OBJECTS DETECTED IN VIDEO",
+                "-" * 70,
+                "",
+            ])
+            for obj in detected:
+                lines.append(f"    - {obj['name']}: seen {obj['total_detections']} times")
+            lines.append("")
+        else:
+            lines.extend([
+                "  Objects: None detected (abstract/ambient or objects not in YOLO vocabulary)",
+                "",
+            ])
+
+        lines.extend([
+            f"  Dominant colors:",
+        ])
 
         for c in style.get("dominant_colors", [])[:6]:
             lines.append(f"    - {c['color']} (appears in {c['frequency']} frames)")
@@ -724,6 +924,15 @@ class VideoWatcher:
 
         for fa in report.get("frame_analyses", []):
             lines.append(f"  [{fa.get('timestamp_str', '?')}] Frame {fa.get('frame', '?')}")
+
+            # Objects detected in this frame
+            obj_data = fa.get("objects", {})
+            if obj_data.get("objects"):
+                obj_list = ", ".join(f"{o['name']} ({o['position']})" for o in obj_data["objects"][:8])
+                lines.append(f"    OBJECTS: {obj_list}")
+                lines.append(f"    Scene: {obj_data.get('scene_type', '?')}")
+            else:
+                lines.append(f"    OBJECTS: None detected | Scene: {obj_data.get('scene_type', 'ambient/abstract')}")
 
             colors = fa.get("colors", {})
             top3 = ", ".join(c["name"] + f" ({c['percentage']}%)" for c in colors.get("dominant", [])[:3])
