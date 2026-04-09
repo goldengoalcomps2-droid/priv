@@ -48,7 +48,7 @@ scene.render.ffmpeg.constant_rate_factor = 'MEDIUM'
 scene.render.ffmpeg.audio_codec = 'AAC'
 
 # Use Eevee for speed
-scene.render.engine = 'BLENDER_EEVEE_NEXT'
+scene.render.engine = 'BLENDER_EEVEE'
 
 # ═══════════════════════════════════════════════════════════
 # COLOUR PALETTE (from video analysis)
@@ -180,8 +180,13 @@ w_bsdf.inputs['Roughness'].default_value = 0.05
 w_bsdf.inputs['IOR'].default_value = 1.33
 w_bsdf.inputs['Alpha'].default_value = 0.7
 w_bsdf.inputs['Metallic'].default_value = 0.0
-w_bsdf.inputs['Emission Color'].default_value = POOL_GLOW
-w_bsdf.inputs['Emission Strength'].default_value = 0.3
+# Emission - compatible with Blender 4.0+
+try:
+    w_bsdf.inputs['Emission Color'].default_value = POOL_GLOW
+    w_bsdf.inputs['Emission Strength'].default_value = 0.3
+except KeyError:
+    w_bsdf.inputs['Emission'].default_value = POOL_GLOW
+    w_bsdf.inputs['Emission Strength'].default_value = 0.3
 
 # Animated water ripple via noise texture
 noise = wn.new('ShaderNodeTexNoise')
@@ -189,18 +194,25 @@ noise.inputs['Scale'].default_value = 8
 noise.inputs['Detail'].default_value = 6
 noise.inputs['Roughness'].default_value = 0.7
 
-# Animate noise for water movement
-noise.inputs['W'].default_value = 0
-noise.inputs['W'].keyframe_insert(data_path="default_value", frame=1)
-noise.inputs['W'].default_value = 10
-noise.inputs['W'].keyframe_insert(data_path="default_value", frame=9000)
+# Animate noise offset for water movement via mapping node
+water_mapping = wn.new('ShaderNodeMapping')
+water_texcoord = wn.new('ShaderNodeTexCoord')
+wl.new(water_texcoord.outputs['Generated'], water_mapping.inputs['Vector'])
+wl.new(water_mapping.outputs['Vector'], noise.inputs['Vector'])
+
+# Keyframe the mapping offset to animate water
+water_mapping.inputs['Location'].default_value = (0, 0, 0)
+water_mapping.inputs['Location'].keyframe_insert(data_path="default_value", frame=1)
+water_mapping.inputs['Location'].default_value = (5, 3, 0)
+water_mapping.inputs['Location'].keyframe_insert(data_path="default_value", frame=9000)
 
 bump = wn.new('ShaderNodeBump')
 bump.inputs['Strength'].default_value = 0.02
 wl.new(noise.outputs['Fac'], bump.inputs['Height'])
 wl.new(bump.outputs['Normal'], w_bsdf.inputs['Normal'])
 
-water_mat.blend_method = 'BLEND' if hasattr(water_mat, 'blend_method') else None
+if hasattr(water_mat, 'blend_method'):
+    water_mat.blend_method = 'BLEND'
 water.data.materials.append(water_mat)
 
 # ═══════════════════════════════════════════════════════════
@@ -342,10 +354,6 @@ cb.correction_method = 'LIFT_GAMMA_GAIN'
 cb.lift = (0.85, 0.85, 1.0)  # Blue shadows
 cb.gamma = (0.95, 0.90, 1.0)  # Purple midtones
 cb.gain = (1.0, 0.95, 0.90)  # Warm highlights
-
-# Vignette
-lens_dist = nodes_c.new('CompositorNodeLensdist')
-lens_dist.inputs['Distort'].default_value = 0.0
 
 # Ellipse mask for vignette
 ellipse = nodes_c.new('CompositorNodeEllipseMask')
