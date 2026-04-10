@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Commander - Agent Team Command Centre</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg1:#070b13;--bg2:#0f1623;--bg3:#172131;--bg4:#0a1120;--bdr:#1f3656;
+  --t1:#e8eef6;--t2:#94a3b8;--t3:#5b6b82;
+  --blue:#3b82f6;--cyan:#06b6d4;--green:#10b981;--yellow:#f59e0b;
+  --red:#ef4444;--purple:#8b5cf6;--pink:#ec4899;--orange:#f97316;
+  --gold:#fbbf24;
+}
+html,body{height:100%}
+body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg1);color:var(--t1);display:flex;overflow:hidden}
+
+/* ============ LEFT PANEL ============ */
+.lpanel{width:260px;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0}
+.lhdr{padding:18px 16px;border-bottom:1px solid var(--bdr);background:linear-gradient(135deg,#0f1c2f,#1a2942)}
+.lhdr h1{font-size:14px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+.lhdr .sub{font-size:10px;color:var(--t3);margin-top:6px;display:flex;align-items:center;gap:6px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.section{padding:10px 14px 4px;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px}
+.alist{flex:1;overflow-y:auto;padding:4px 8px}
+.ai{padding:9px 10px;margin-bottom:3px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:.2s;border:1px solid transparent}
+.ai:hover{background:var(--bg3);border-color:var(--bdr)}
+.ai.busy{border-color:var(--cyan)}
+.aicon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.aicon.cmd{background:rgba(251,191,36,.2);color:var(--gold)}
+.aicon.str{background:rgba(139,92,246,.2);color:var(--purple)}
+.aicon.res{background:rgba(6,182,212,.2);color:var(--cyan)}
+.aicon.ops{background:rgba(16,185,129,.2);color:var(--green)}
+.aicon.frc{background:rgba(245,158,11,.2);color:var(--yellow)}
+.aicon.qaa{background:rgba(239,68,68,.2);color:var(--red)}
+.aicon.rsc{background:rgba(249,115,22,.2);color:var(--orange)}
+.aicon.orc{background:rgba(59,130,246,.2);color:var(--blue)}
+.aname{font-size:12px;font-weight:600;color:var(--t1)}
+.arole{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.acount{margin-left:auto;font-size:10px;color:var(--cyan);font-weight:700}
+.qbtn{display:block;width:calc(100% - 16px);margin:3px 8px;padding:7px 10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:5px;color:var(--t2);font-size:11px;cursor:pointer;text-align:left;font-family:inherit;transition:.2s}
+.qbtn:hover{border-color:var(--gold);color:var(--t1)}
+.lfooter{padding:10px;border-top:1px solid var(--bdr);font-size:10px;color:var(--t3);text-align:center}
+
+/* ============ CENTRE: CHAT ============ */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chdr{padding:14px 22px;background:var(--bg2);border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center}
+.chdr-l{display:flex;align-items:center;gap:12px}
+.chdr h2{font-size:14px;color:var(--gold);letter-spacing:1.2px}
+.chdr .role{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.hstats{display:flex;gap:14px;font-size:10px}
+.stat{display:flex;align-items:center;gap:5px;color:var(--t2)}
+.sv{color:var(--cyan);font-weight:700}
+
+.msgs{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;background:radial-gradient(circle at top right,rgba(251,191,36,.03),transparent 50%)}
+.msg{display:flex;gap:10px;max-width:88%;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.usr{align-self:flex-end;flex-direction:row-reverse}
+.mav{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-weight:700}
+.msg.usr .mav{background:rgba(59,130,246,.2);color:var(--blue)}
+.mav.cmd{background:rgba(251,191,36,.2);color:var(--gold);box-shadow:0 0 0 1px rgba(251,191,36,.3)}
+.mc{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:11px 15px;min-width:80px;max-width:100%}
+.msg.usr .mc{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3)}
+.msg.cmd .mc{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.25)}
+.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:12px}
+.msn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.msn.commander{color:var(--gold)}.msn.user{color:var(--blue)}
+.mt{font-size:9px;color:var(--t3)}
+.mb{font-size:12.5px;line-height:1.65;color:var(--t2);white-space:pre-wrap;word-wrap:break-word}
+.mb strong{color:var(--t1);font-weight:600}
+.mb code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-size:11px;color:var(--cyan)}
+.mtag{display:inline-block;font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(6,182,212,.15);color:var(--cyan);margin-left:6px;text-transform:uppercase;letter-spacing:.5px}
+.mtag.intent{background:rgba(251,191,36,.15);color:var(--gold)}
+.mtag.targets{background:rgba(139,92,246,.15);color:var(--purple)}
+
+.cinput{padding:14px 22px;background:var(--bg2);border-top:1px solid var(--bdr)}
+.iw{display:flex;gap:8px;align-items:center}
+.ci{flex:1;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:11px 16px;color:var(--t1);font-size:13px;font-family:inherit;outline:none;transition:.2s}
+.ci:focus{border-color:var(--gold)}
+.ci::placeholder{color:var(--t3)}
+.sbtn{width:42px;height:42px;background:var(--gold);border:none;border-radius:8px;color:var(--bg1);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0;font-weight:700}
+.sbtn:hover{background:#f59e0b;transform:scale(1.05)}
+.ihint{margin-top:7px;font-size:9px;color:var(--t3);text-align:center}
+.ihint kbd{background:var(--bg4);padding:1px 4px;border-radius:3px;border:1px solid var(--bdr);color:var(--t2)}
+
+/* ============ RIGHT: ACTIVITY FEED ============ */
+.rpanel{width:340px;background:var(--bg2);border-left:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.phdr{padding:14px 16px;border-bottom:1px solid var(--bdr);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);display:flex;justify-content:space-between;align-items:center}
+.phdr .lblv{font-size:9px;color:var(--t3);font-weight:400}
+.pcont{flex:1;overflow-y:auto;padding:8px 12px}
+.event{padding:8px 10px;margin-bottom:5px;background:var(--bg3);border:1px solid var(--bdr);border-left:3px solid var(--cyan);border-radius:5px;font-size:11px;animation:fadeIn .3s}
+.event.from-commander{border-left-color:var(--gold)}
+.event.from-strategy{border-left-color:var(--purple)}
+.event.from-research{border-left-color:var(--cyan)}
+.event.from-operations{border-left-color:var(--green)}
+.event.from-forecast{border-left-color:var(--yellow)}
+.event.from-qa{border-left-color:var(--red)}
+.event.from-resource{border-left-color:var(--orange)}
+.event.from-orchestrator{border-left-color:var(--blue)}
+.ev-h{display:flex;justify-content:space-between;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.ev-from{color:var(--t1);font-weight:700}
+.ev-arrow{color:var(--t3)}
+.ev-sub{font-size:11px;color:var(--t1);font-weight:500}
+.ev-body{font-size:10.5px;color:var(--t2);margin-top:2px;line-height:1.4}
+.ev-type{display:inline-block;font-size:8px;padding:1px 4px;border-radius:2px;background:var(--bg4);color:var(--cyan);text-transform:uppercase;letter-spacing:.4px;margin-left:5px}
+
+.empty{text-align:center;padding:28px 14px;color:var(--t3);font-size:11px;line-height:1.6}
+.welcome{text-align:center;padding:34px 18px}
+.welcome h2{color:var(--gold);font-size:17px;margin-bottom:10px;letter-spacing:1px}
+.welcome p{font-size:12px;line-height:1.8;color:var(--t2)}
+.welcome p code{background:rgba(251,191,36,.1);color:var(--gold);padding:1px 6px;border-radius:3px}
+.typing{display:flex;gap:4px;padding:6px 0}
+.typing span{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:typ 1.4s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes typ{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#2a4870}
+
+@media(max-width:1100px){.rpanel{width:280px}}
+@media(max-width:900px){.rpanel{display:none}.lpanel{width:60px}.ainfo,.lpanel .section,.lpanel .qbtn,.lpanel .sub,.lfooter{display:none}.lhdr h1{font-size:9px;text-align:center;letter-spacing:0}.ai{justify-content:center;padding:8px 4px}.acount{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ============ LEFT: TEAM ROSTER ============ -->
+<div class="lpanel">
+  <div class="lhdr">
+    <h1>Lead Commander</h1>
+    <div class="sub"><span class="dot"></span>Online · routing live</div>
+  </div>
+
+  <div class="section">Command</div>
+  <div class="alist" id="aList">
+    <div class="ai" data-agent="commander">
+      <div class="aicon cmd">LC</div>
+      <div class="ainfo"><div class="aname">LeadCommander</div><div class="arole">Chief of Staff</div></div>
+      <div class="acount" id="c-commander">0</div>
+    </div>
+    <div class="ai" data-agent="orchestrator">
+      <div class="aicon orc">OR</div>
+      <div class="ainfo"><div class="aname">Orchestrator</div><div class="arole">Coordination</div></div>
+      <div class="acount" id="c-orchestrator">0</div>
+    </div>
+
+    <div class="section" style="padding-left:0">Specialists</div>
+    <div class="ai" data-agent="strategy">
+      <div class="aicon str">S</div>
+      <div class="ainfo"><div class="aname">Strategy</div><div class="arole">Plans &amp; Methods</div></div>
+      <div class="acount" id="c-strategy">0</div>
+    </div>
+    <div class="ai" data-agent="research">
+      <div class="aicon res">R</div>
+      <div class="ainfo"><div class="aname">Research</div><div class="arole">Data &amp; Analysis</div></div>
+      <div class="acount" id="c-research">0</div>
+    </div>
+    <div class="ai" data-agent="operations">
+      <div class="aicon ops">O</div>
+      <div class="ainfo"><div class="aname">Operations</div><div class="arole">Task Execution</div></div>
+      <div class="acount" id="c-operations">0</div>
+    </div>
+    <div class="ai" data-agent="forecast">
+      <div class="aicon frc">F</div>
+      <div class="ainfo"><div class="aname">Forecast</div><div class="arole">Predictions &amp; Risk</div></div>
+      <div class="acount" id="c-forecast">0</div>
+    </div>
+    <div class="ai" data-agent="qa">
+      <div class="aicon qaa">Q</div>
+      <div class="ainfo"><div class="aname">QA</div><div class="arole">Quality &amp; Tests</div></div>
+      <div class="acount" id="c-qa">0</div>
+    </div>
+    <div class="ai" data-agent="resource">
+      <div class="aicon rsc">T</div>
+      <div class="ainfo"><div class="aname">Resource</div><div class="arole">Tools &amp; Vendors</div></div>
+      <div class="acount" id="c-resource">0</div>
+    </div>
+  </div>
+
+  <div class="section">Quick Asks</div>
+  <button class="qbtn" onclick="ask('Give me a full team status overview')">Team status</button>
+  <button class="qbtn" onclick="ask('What is research working on right now?')">Research update</button>
+  <button class="qbtn" onclick="ask('Show me the forecast and risks')">Forecast &amp; risks</button>
+  <button class="qbtn" onclick="ask('Run a full orchestration cycle')">Run cycle</button>
+  <button class="qbtn" onclick="ask('Show me all pending approvals')">Pending approvals</button>
+  <div class="lfooter">v1.0 · 7 agents online</div>
+</div>
+
+<!-- ============ CENTRE: CHAT ============ -->
+<div class="main">
+  <div class="chdr">
+    <div class="chdr-l">
+      <div class="mav cmd">LC</div>
+      <div>
+        <h2>Lead Commander</h2>
+        <div class="role">Direct line · routes to the entire team</div>
+      </div>
+    </div>
+    <div class="hstats">
+      <div class="stat">Routed:<span class="sv" id="sRouted">0</span></div>
+      <div class="stat">Bus events:<span class="sv" id="sEvents">0</span></div>
+      <div class="stat">Last:<span class="sv" id="sLast">-</span></div>
+    </div>
+  </div>
+
+  <div class="msgs" id="msgs">
+    <div class="welcome">
+      <h2>Reporting for duty.</h2>
+      <p>I'm your lead commander. Tell me anything - an instruction, a question, an idea, a task -<br>
+      and I'll route it to the right specialist on the team and report back with their decisions.<br><br>
+      Try: <code>research the YouTube AI niche</code> or <code>what is the team forecast?</code> or <code>build a content calendar</code></p>
+    </div>
+  </div>
+
+  <div class="cinput">
+    <div class="iw">
+      <input type="text" class="ci" id="inp" placeholder="Brief the commander..." autocomplete="off">
+      <button class="sbtn" onclick="send()">&#9654;</button>
+    </div>
+    <div class="ihint">Press <kbd>Enter</kbd> to send · Commander routes to the right agent automatically</div>
+  </div>
+</div>
+
+<!-- ============ RIGHT: LIVE ACTIVITY FEED ============ -->
+<div class="rpanel">
+  <div class="phdr">
+    <span>Live Agent Activity</span>
+    <span class="lblv" id="feedCount">0 events</span>
+  </div>
+  <div class="pcont" id="feed">
+    <div class="empty">No agent activity yet. The feed updates in real time as the commander routes work and the team executes.</div>
+  </div>
+</div>
+
+<script>
+// ====================== STATE ======================
+const $=id=>document.getElementById(id);
+const msgsEl=$("msgs"), inpEl=$("inp"), feedEl=$("feed");
+let routedCount=0, lastEventTs="";
+const seenEvents=new Set();
+
+const IC={commander:"LC",orchestrator:"OR",strategy:"S",research:"R",operations:"O",forecast:"F",qa:"Q",resource:"T",user:"\u2605"};
+const ICCLASS={commander:"cmd",orchestrator:"orc",strategy:"str",research:"res",operations:"ops",forecast:"frc",qa:"qaa",resource:"rsc"};
+
+function now(){return new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
+
+function escapeHtml(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function fmtMd(s){return escapeHtml(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/`(.+?)`/g,"<code>$1</code>")}
+
+// ====================== CHAT MESSAGES ======================
+function addMsg(sender, role, text, isUser, intent, targets){
+  const w=msgsEl.querySelector(".welcome"); if(w)w.remove();
+  const d=document.createElement("div");
+  d.className="msg "+(isUser?"usr":(role==="commander"?"cmd":""));
+  const ic = isUser ? "\u2605" : (IC[role]||"?");
+  const klass = isUser ? "" : (ICCLASS[role]||"cmd");
+  let tags="";
+  if(intent) tags += `<span class="mtag intent">${intent}</span>`;
+  if(targets && targets.length) tags += `<span class="mtag targets">\u2192 ${targets.join(", ")}</span>`;
+  d.innerHTML = `
+    <div class="mav ${klass}">${ic}</div>
+    <div class="mc">
+      <div class="mhdr">
+        <span class="msn ${role||"commander"}">${sender}${tags}</span>
+        <span class="mt">${now()}</span>
+      </div>
+      <div class="mb">${fmtMd(text)}</div>
+    </div>`;
+  msgsEl.appendChild(d);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+
+function showTyping(){
+  const d=document.createElement("div");
+  d.className="msg cmd"; d.id="typing";
+  d.innerHTML='<div class="mav cmd">LC</div><div class="mc"><div class="typing"><span></span><span></span><span></span></div></div>';
+  msgsEl.appendChild(d); msgsEl.scrollTop=msgsEl.scrollHeight;
+  return d;
+}
+
+// ====================== ACTIVITY FEED ======================
+function addEvent(ev){
+  if(seenEvents.has(ev.id)) return false;
+  seenEvents.add(ev.id);
+  // Remove empty state
+  const empty = feedEl.querySelector(".empty");
+  if(empty) empty.remove();
+
+  const role = ev.from || "orchestrator";
+  const d = document.createElement("div");
+  d.className = "event from-"+role;
+  d.innerHTML = `
+    <div class="ev-h">
+      <span><span class="ev-from">${ev.from}</span><span class="ev-arrow"> \u2192 ${ev.to}</span></span>
+      <span>${(ev.ts||"").substr(11,5)}</span>
+    </div>
+    <div class="ev-sub">${escapeHtml(ev.subject||"")}<span class="ev-type">${ev.type||""}</span></div>
+    ${ev.body ? `<div class="ev-body">${escapeHtml(ev.body).substr(0,180)}</div>` : ""}
+  `;
+  feedEl.insertBefore(d, feedEl.firstChild);
+
+  // Bump per-agent counter
+  const c = $("c-"+role);
+  if(c){ c.textContent = (parseInt(c.textContent)||0)+1; }
+  return true;
+}
+
+// ====================== POLLING ======================
+async function pollBriefing(){
+  try{
+    const r = await fetch("/api/commander/briefing");
+    if(!r.ok) return;
+    const b = await r.json();
+    let added=0;
+    (b.activity_feed||[]).forEach(ev=>{ if(addEvent(ev)) added++; });
+    $("sEvents").textContent = (b.activity_feed||[]).length;
+    $("feedCount").textContent = (b.activity_feed||[]).length+" events";
+    if(b.last_routing && b.last_routing.ts){
+      $("sLast").textContent = b.last_routing.ts.substr(11,5);
+    }
+  }catch(e){ /* offline ok */ }
+}
+
+// ====================== SEND ======================
+async function send(){
+  const text = inpEl.value.trim();
+  if(!text) return;
+  inpEl.value="";
+  addMsg("You","user",text,true);
+  const typ = showTyping();
+  try{
+    const r = await fetch("/api/commander/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({message: text})
+    });
+    typ.remove();
+    if(!r.ok){
+      addMsg("LeadCommander","commander","(error contacting backend - is the Flask server running on port 5000?)",false);
+      return;
+    }
+    const result = await r.json();
+    addMsg("LeadCommander","commander", result.reply || "(no reply)", false, result.intent, result.targets);
+    routedCount++; $("sRouted").textContent = routedCount;
+    pollBriefing();
+  }catch(e){
+    typ.remove();
+    addMsg("LeadCommander","commander","(network error: "+e.message+")",false);
+  }
+}
+
+function ask(text){ inpEl.value = text; send(); }
+
+inpEl.addEventListener("keydown", e=>{
+  if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(); }
+});
+
+// Click an agent in the roster to ask the commander about them
+document.querySelectorAll(".ai").forEach(el=>{
+  el.addEventListener("click", ()=>{
+    const name = el.dataset.agent;
+    if(name && name!=="commander") ask("What is "+name+" working on right now?");
+  });
+});
+
+// Start polling
+pollBriefing();
+setInterval(pollBriefing, 4000);
+inpEl.focus();
+</script>
+</body>
+</html>

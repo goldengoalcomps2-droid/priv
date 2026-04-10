@@ -22,6 +22,7 @@ class AgentRole(Enum):
     QA = "qa"
     RESOURCE = "resource"
     ORCHESTRATOR = "orchestrator"
+    COMMANDER = "commander"
 
 
 class ActionPriority(Enum):

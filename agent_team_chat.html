@@ -23,6 +23,11 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg1
 .aicon.ops{background:rgba(16,185,129,.2);color:var(--green)}.aicon.frc{background:rgba(245,158,11,.2);color:var(--yellow)}
 .aicon.qaa{background:rgba(239,68,68,.2);color:var(--red)}.aicon.rsc{background:rgba(249,115,22,.2);color:var(--orange)}
 .aicon.oc{background:rgba(236,72,153,.2);color:var(--pink)}.aicon.pc{background:rgba(168,85,247,.2);color:#a855f7}
+.aicon.cmd{background:rgba(251,191,36,.22);color:#fbbf24;box-shadow:0 0 0 1px rgba(251,191,36,.35)}
+.msn.commander{color:#fbbf24}
+.mtag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;margin-left:6px;text-transform:uppercase;letter-spacing:.4px}
+.mtag.intent{background:rgba(251,191,36,.18);color:#fbbf24}
+.mtag.targets{background:rgba(139,92,246,.18);color:var(--purple)}
 .aname{font-size:12px;font-weight:600}.arole{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
 .qbtn{display:block;width:calc(100% - 16px);margin:3px 8px;padding:7px 10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:5px;color:var(--t2);font-size:11px;cursor:pointer;text-align:left;font-family:inherit;transition:.2s}
 .qbtn:hover{border-color:var(--cyan);color:var(--t1)}
@@ -74,9 +79,11 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg1
 </head>
 <body>
 <div class="sidebar">
-<div class="sidebar-hdr"><h1>Agent Team</h1><div class="sub"><span class="dot"></span>Command Centre Online</div></div>
-<div class="section">Internal Agents</div>
+<div class="sidebar-hdr"><h1>Agent Team</h1><div class="sub"><span class="dot"></span>Lead Commander Online</div></div>
+<div class="section">Command</div>
 <div class="alist">
+<div class="ai" onclick="sq('what is the team status')"><div class="aicon cmd">LC</div><div class="ainfo"><div class="aname">LeadCommander</div><div class="arole">Chief of Staff</div></div></div>
+<div class="section" style="padding-top:8px">Specialists</div>
 <div class="ai" onclick="sq('run strategy')"><div class="aicon str">S</div><div class="ainfo"><div class="aname">Strategy</div><div class="arole">Plans & Methods</div></div></div>
 <div class="ai" onclick="sq('run research')"><div class="aicon res">R</div><div class="ainfo"><div class="aname">Research</div><div class="arole">Data & Analysis</div></div></div>
 <div class="ai" onclick="sq('run operations')"><div class="aicon ops">O</div><div class="ainfo"><div class="aname">Operations</div><div class="arole">Task Execution</div></div></div>
@@ -94,20 +101,20 @@ body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:var(--bg1
 <button class="qbtn" onclick="sq('run cycle')">Run Cycle</button>
 <button class="qbtn" onclick="sq('forecast')">Forecast</button>
 <button class="qbtn" onclick="sq('help')">Help</button>
-<div class="sfooter">v1.0.0 | 6 Agents Active</div>
+<div class="sfooter">v1.1.0 | LeadCommander + 6 Agents</div>
 </div>
 
 <div class="main">
 <div class="chdr">
-<h2><span class="dot"></span>Agent Team Gateway</h2>
+<h2><span class="dot"></span>Lead Commander · Agent Team Gateway</h2>
 <div class="hstats">
-<div class="stat">Agents:<span class="sv" id="sAgents">6</span></div>
+<div class="stat">Agents:<span class="sv" id="sAgents">7</span></div>
 <div class="stat">Cycle:<span class="sv" id="sCycle">0</span></div>
 <div class="stat">Approvals:<span class="sv" id="sAppr">0</span></div>
 </div>
 </div>
 <div class="msgs" id="msgs">
-<div class="welcome"><h2>Agent Team Command Centre</h2><p>6 agents standing by. Type a command or message below.<br>Try: <code>status</code> | <code>tasks</code> | <code>forecast</code> | <code>run cycle</code> | <code>help</code></p></div>
+<div class="welcome"><h2>Lead Commander reporting.</h2><p>I'm your direct line to the entire team. Brief me with any instruction, question, idea or task -<br>I'll route it to the right specialist and report back with their decisions.<br><br>Try: <code>research the YouTube AI niche</code> | <code>what is the team forecast?</code> | <code>build a content calendar</code> | <code>help</code></p></div>
 </div>
 <div class="cinput"><div class="iw"><input type="text" class="ci" id="inp" placeholder="Message the team or type a command..." autocomplete="off"><button class="sbtn" onclick="send()">&#9654;</button></div><div class="ihint">Press Enter to send | Type 'help' for commands</div></div>
 </div>
@@ -173,21 +180,61 @@ P.approvals.push({id:"ap"+i,title:t,agent:["strategy","strategy","strategy","str
 });
 
 // ============ ICONS ============
-const IC={strategy:"S",research:"R",operations:"O",forecast:"F",qa:"Q",resource:"T",orchestrator:"\u25CF"};
-const BGIC={strategy:"str",research:"res",operations:"ops",forecast:"frc",qa:"qaa",resource:"rsc",orchestrator:"str"};
+const IC={commander:"LC",strategy:"S",research:"R",operations:"O",forecast:"F",qa:"Q",resource:"T",orchestrator:"\u25CF"};
+const BGIC={commander:"cmd",strategy:"str",research:"res",operations:"ops",forecast:"frc",qa:"qaa",resource:"rsc",orchestrator:"str"};
+
+// ============ COMMANDER ROUTING (client mirror of LeadCommanderAgent) ============
+const ROUTE_KW={
+strategy:[/\bstrateg(y|ies|ic)\b/,/\bplan(s|ning)?\b/,/\bgoal(s)?\b/,/\bmilestone(s)?\b/,/\broadmap\b/,/\bpivot\b/],
+research:[/\bresearch\b/,/\bmarket\b/,/\bcompetit(or|ive|ion)\b/,/\banalys(e|is|ze)\b/,/\binvestigat(e|ion)\b/,/\btrend(s)?\b/],
+operations:[/\bexecut(e|ion)\b/,/\btask(s)?\b/,/\bdeploy\b/,/\bship\b/,/\bworkflow(s)?\b/,/\bschedule\b/,/\bbacklog\b/],
+forecast:[/\bforecast(s|ing)?\b/,/\bpredict(ion|ions)?\b/,/\brisk(s)?\b/,/\bscenario(s)?\b/,/\bvelocity\b/,/\bdeadline(s)?\b/],
+qa:[/\bqa\b/,/\bqualit(y|ies)\b/,/\btest(s|ing)?\b/,/\bvalidat(e|ion)\b/,/\bbug(s)?\b/,/\baudit\b/,/\breview\b/],
+resource:[/\bresource(s)?\b/,/\btool(s|ing)?\b/,/\bintegrat(e|ion|ions)\b/,/\bbudget\b/,/\bvendor(s)?\b/,/\bplatform(s)?\b/]
+};
+const QUERY_RE=/\b(what|how|why|when|where|who|show|list|tell|give|status|report|update)\b/i;
+const ACTION_RE=/\b(do|make|build|create|run|execute|launch|start|deploy|ship|schedule|set up|delegate|assign)\b/i;
+const IDEA_RE=/\b(idea|suggest|consider|what if|maybe|propose|brainstorm|thought)\b/i;
+function commanderRoute(msg){
+  const lo=msg.toLowerCase();
+  let intent="message";
+  if(QUERY_RE.test(msg)&&!ACTION_RE.test(msg))intent="query";
+  else if(ACTION_RE.test(msg))intent="action";
+  else if(IDEA_RE.test(msg))intent="idea";
+  const scores=Object.entries(ROUTE_KW).map(([role,kws])=>[role,kws.reduce((s,k)=>s+(k.test(lo)?1:0),0)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const top=scores.length?scores[0][1]:0;
+  const targets=scores.filter(s=>s[1]>=top).map(s=>s[0]).slice(0,3);
+  return{intent,targets};
+}
+function commanderReply(msg,routing){
+  const {intent,targets}=routing;
+  let reply="";
+  if(intent==="query"){
+    reply=targets.length?`Pulling the latest from **${targets.join(", ")}** for you now.`:`Pulling a full team overview.`;
+  }else if(intent==="action"){
+    reply=targets.length?`Acknowledged. I'm dispatching this to **${targets.join(", ")}** as a high-priority task. They'll begin on the next cycle - I'll surface their decisions as they come in.`:`Acknowledged. I'll route this to operations.`;
+  }else if(intent==="idea"){
+    reply=`Captured. I'm passing the idea to **${(targets[0]||"strategy")}** for evaluation and will come back with their take.`;
+  }else{
+    reply=targets.length?`Message routed to **${targets.join(", ")}**. Standing by for their response.`:`Broadcast to the entire team. Watching the bus for replies.`;
+  }
+  return{a:"LeadCommander",r:"commander",m:reply,intent,targets};
+}
 
 // ============ DOM ============
 const $=id=>document.getElementById(id);
 const msgs=$("msgs"),inp=$("inp");
 
 function now(){return new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
-function addMsg(sender,role,text,isUser){
+function addMsg(sender,role,text,isUser,intent,targets){
 const w=msgs.querySelector(".welcome");if(w)w.remove();
 const d=document.createElement("div");d.className="msg"+(isUser?" usr":"");
 const ic=isUser?"\u2605":(IC[role]||"?");
-const bg=isUser?"":"aicon "+(BGIC[role]||"str");
 let r=text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/`(.+?)`/g,"<code>$1</code>");
-d.innerHTML=`<div class="mav ${isUser?"":"aicon "+(BGIC[role]||"str")}">${ic}</div><div class="mc"><div class="mhdr"><span class="msn ${role||"orchestrator"}">${sender}</span><span class="mt">${now()}</span></div><div class="mb">${r}</div></div>`;
+let tags="";
+if(intent)tags+=`<span class="mtag intent">${intent}</span>`;
+if(targets&&targets.length)tags+=`<span class="mtag targets">\u2192 ${targets.join(", ")}</span>`;
+d.innerHTML=`<div class="mav ${isUser?"":"aicon "+(BGIC[role]||"str")}">${ic}</div><div class="mc"><div class="mhdr"><span class="msn ${role||"orchestrator"}">${sender}${tags}</span><span class="mt">${now()}</span></div><div class="mb">${r}</div></div>`;
 msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
 }
 
@@ -356,9 +403,14 @@ const m=inp.value.trim();if(!m)return;inp.value="";
 addMsg("You","user",m,true);
 const typ=showTyping();
 setTimeout(()=>{typ.remove();
+// Lead Commander always speaks first - he routes the message and reports
+const routing=commanderRoute(m);
+const cmdr=commanderReply(m,routing);
+addMsg(cmdr.a,cmdr.r,cmdr.m,false,cmdr.intent,cmdr.targets);
+// Then surface the relevant specialist responses
 const responses=handle(m);
-responses.forEach((r,i)=>setTimeout(()=>addMsg(r.a,r.r,r.m,false),i*200));
-setTimeout(updPanel,responses.length*200+100);
+responses.forEach((r,i)=>setTimeout(()=>addMsg(r.a,r.r,r.m,false),(i+1)*220));
+setTimeout(updPanel,(responses.length+1)*220+100);
 },400);
 }
 

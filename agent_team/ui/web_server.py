@@ -29,13 +29,14 @@ app = Flask(__name__, static_folder=str(Path(__file__).parent / "static"))
 _orch: Orchestrator = None
 _comm: CommunicationHub = None
 _acp: ACPHub = None
+_commander = None  # LeadCommanderAgent
 _chat_log: list[dict] = []
 
 
 def _init_team():
-    global _orch, _comm, _acp
+    global _orch, _comm, _acp, _commander
     if _orch is None:
-        _orch, _comm, _acp = build_team()
+        _orch, _comm, _acp, _commander = build_team()
         # Try to load existing project
         project_path = Path(__file__).parent.parent / "projects" / "income_engine.json"
         if project_path.exists():
@@ -201,26 +202,35 @@ def _agent_response(user_msg: str) -> list[dict]:
             })
 
     else:
-        # General message to team
-        _comm.send_to_team(user_msg)
+        # General message - hand it to the lead commander, who routes
+        # it to the right specialist(s) and reports back.
+        result = _commander.handle_user_message(user_msg)
         responses.append({
-            "agent": "Orchestrator",
-            "role": "orchestrator",
-            "message": f"Message delivered to the team: \"{user_msg}\"",
-            "type": "info",
+            "agent": "LeadCommander",
+            "role": "commander",
+            "message": result.get("reply", ""),
+            "type": result.get("intent", "info"),
         })
-        # Each agent acknowledges
-        for role, agent in _orch.agents.items():
-            if agent.active:
-                analysis = agent.analyse_project(_orch.active_project.to_dict() if _orch.active_project else {})
-                summary_keys = [k for k in analysis.keys() if k != "agent"]
-                brief = ", ".join(f"{k}: {v}" for k, v in list(analysis.items())[:3] if k != "agent")
-                responses.append({
-                    "agent": agent.name,
-                    "role": role.value,
-                    "message": f"Acknowledged. Current analysis: {brief}",
-                    "type": "info",
-                })
+        # Surface any per-agent events the commander generated
+        for ev in result.get("events", []):
+            agent_role = ev.get("agent", "orchestrator")
+            etype = ev.get("type", "info")
+            if etype == "delegation":
+                msg = f"Task delegated by Commander: {ev.get('title', '')} (#{ev.get('task_id', '?')})"
+            elif etype == "idea_routed":
+                msg = f"Idea forwarded by Commander for evaluation"
+            elif etype == "broadcast":
+                msg = f"Message broadcast by Commander"
+            elif etype == "error":
+                msg = f"Routing error: {ev.get('error', '')}"
+            else:
+                msg = f"{etype}: {ev}"
+            responses.append({
+                "agent": agent_role,
+                "role": agent_role,
+                "message": msg,
+                "type": etype,
+            })
 
     return responses
 
@@ -551,6 +561,73 @@ def api_notifications():
         "notifications": _comm.get_notifications(unread_only=True),
         "pending_approvals": len(_comm.get_pending_approvals()),
     })
+
+
+# --- Lead Commander endpoints ----------------------------------------------
+
+@app.route("/commander")
+def commander_index():
+    """Serve the dedicated lead commander chat UI."""
+    return send_from_directory(app.static_folder, "commander_chat.html")
+
+
+@app.route("/api/commander/chat", methods=["POST"])
+def api_commander_chat():
+    """Send a message to the lead commander and get his structured reply."""
+    _init_team()
+    data = request.get_json() or {}
+    text = (data.get("message") or "").strip()
+    if not text:
+        return jsonify({"error": "Empty message"}), 400
+    result = _commander.handle_user_message(text)
+    # Mirror into the legacy chat log so /api/history still works
+    _chat_log.append({
+        "sender": "user",
+        "message": text,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+    _chat_log.append({
+        "sender": "LeadCommander",
+        "role": "commander",
+        "message": result.get("reply", ""),
+        "type": result.get("intent", "info"),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+    return jsonify(result)
+
+
+@app.route("/api/commander/briefing")
+def api_commander_briefing():
+    """Single payload the chat UI can poll: routing, activity, agent feed."""
+    _init_team()
+    return jsonify(_commander.briefing())
+
+
+@app.route("/api/commander/activity")
+def api_commander_activity():
+    """Live bus activity feed (optionally since a timestamp)."""
+    _init_team()
+    since = request.args.get("since")
+    limit = int(request.args.get("limit", 50))
+    return jsonify({
+        "events": _commander.get_activity_feed(limit=limit, since=since),
+    })
+
+
+@app.route("/api/commander/agent/<role>")
+def api_commander_agent(role):
+    """Recent activity for one specific agent."""
+    _init_team()
+    return jsonify({
+        "role": role,
+        "events": _commander.get_agent_activity(role, limit=30),
+    })
+
+
+@app.route("/api/commander/conversation")
+def api_commander_conversation():
+    _init_team()
+    return jsonify({"conversation": _commander.get_conversation(limit=200)})
 
 
 def run_server(host="0.0.0.0", port=5000, debug=False):

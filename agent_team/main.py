@@ -22,6 +22,7 @@ from .agents.operations_agent import OperationsAgent
 from .agents.forecast_agent import ForecastAgent
 from .agents.qa_agent import QAAgent
 from .agents.resource_agent import ResourceAgent
+from .agents.lead_commander_agent import LeadCommanderAgent
 from .acp.protocol import ACPHub
 from .ui.cli import CLI
 
@@ -34,19 +35,25 @@ def setup_logging(level: str = "WARNING"):
     )
 
 
-def build_team() -> tuple[Orchestrator, CommunicationHub, ACPHub]:
+def build_team() -> tuple[Orchestrator, CommunicationHub, ACPHub, LeadCommanderAgent]:
     """Assemble the full agent team and supporting infrastructure."""
 
     # Core orchestrator
     orchestrator = Orchestrator()
 
-    # Register all agents
+    # Register all specialist agents
     orchestrator.register_agent(StrategyAgent())
     orchestrator.register_agent(ResearchAgent())
     orchestrator.register_agent(OperationsAgent())
     orchestrator.register_agent(ForecastAgent())
     orchestrator.register_agent(QAAgent())
     orchestrator.register_agent(ResourceAgent())
+
+    # Lead Commander - the user's primary point of contact for the team.
+    # Registered last so he can already see all the other agents.
+    commander = LeadCommanderAgent()
+    orchestrator.register_agent(commander)
+    commander.attach_orchestrator(orchestrator)
 
     # Communication hub
     comm_hub = CommunicationHub(orchestrator.bus)
@@ -80,14 +87,14 @@ def build_team() -> tuple[Orchestrator, CommunicationHub, ACPHub]:
         metadata={"description": "Document and content management AI agent"},
     )
 
-    return orchestrator, comm_hub, acp_hub
+    return orchestrator, comm_hub, acp_hub, commander
 
 
 def main():
     """Entry point."""
     setup_logging()
 
-    orchestrator, comm_hub, acp_hub = build_team()
+    orchestrator, comm_hub, acp_hub, commander = build_team()
 
     # Load project if path given
     if len(sys.argv) > 1 and sys.argv[1] == "--project":
