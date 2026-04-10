@@ -4,6 +4,7 @@ A cross-browser YouTube automation bot built with [Playwright](https://playwrigh
 
 ## Features
 
+- **Easy-to-use GUI** — point-and-click control panel with action buttons and live log
 - **Cross-browser** — works on Chromium, Firefox, and WebKit (Safari)
 - **Hands-free video watching** — no mouse movement required
 - **Automatic ad skipping** — detects and skips YouTube ads; waits out unskippable ones
@@ -26,6 +27,19 @@ playwright install
 ```
 
 ## Quick Start
+
+### Easiest: Graphical Interface (recommended)
+
+```bash
+python3 gui.py
+```
+
+Opens a control panel where you can:
+- Click buttons to add commands (Visit YouTube, Search, Watch, Like, etc.)
+- Edit the script directly in the editor
+- Press **▶ Run Script** and watch the live log
+- Save and load instruction scripts
+- Switch between Chromium / Firefox / WebKit
 
 ### Run from an instruction file
 
