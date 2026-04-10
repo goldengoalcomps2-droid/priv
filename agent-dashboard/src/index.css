@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+body {
+  background: #0a0e17;
+  color: #e2e8f0;
+  font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  margin: 0;
+  overflow: hidden;
+  height: 100vh;
+}
+
+#root { height: 100vh; }
+
+.office-grid {
+  background-image:
+    linear-gradient(rgba(30, 58, 95, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 58, 95, 0.12) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+@keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+@keyframes work-pulse { 0%,100%{box-shadow:0 0 10px var(--glow)} 50%{box-shadow:0 0 30px var(--glow)} }
+@keyframes float-zzz { 0%,100%{transform:translateY(0);opacity:.5} 50%{transform:translateY(-10px);opacity:1} }
+@keyframes celebration { 0%{transform:scale(1)} 30%{transform:scale(1.2) rotate(-4deg)} 60%{transform:scale(1.15) rotate(4deg)} 100%{transform:scale(1)} }
+@keyframes dash-flow { to{stroke-dashoffset:-20} }
+@keyframes slide-up { from{transform:translateY(8px);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes hourglass { 0%,100%{transform:rotate(0deg)} 50%{transform:rotate(180deg)} }
+@keyframes ripple { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(2.5);opacity:0} }
+@keyframes typing { 0%{width:0} 50%{width:100%} 100%{width:0} }
+
+.anim-breathe { animation: breathe 3s ease-in-out infinite; }
+.anim-work { animation: work-pulse 1.5s ease-in-out infinite; }
+.anim-zzz { animation: float-zzz 2s ease-in-out infinite; }
+.anim-celebrate { animation: celebration 0.8s ease-in-out; }
+.anim-dash { animation: dash-flow 1s linear infinite; }
+.anim-slide { animation: slide-up 0.3s ease-out; }
+.anim-hourglass { animation: hourglass 2s ease-in-out infinite; }
+.anim-ripple { animation: ripple 1.5s ease-out infinite; }
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:3px}
