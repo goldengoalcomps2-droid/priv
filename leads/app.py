@@ -17,7 +17,6 @@ import webbrowser
 from datetime import datetime
 from pathlib import Path
 
-import anthropic
 import requests
 from bs4 import BeautifulSoup
 from flask import (
@@ -31,26 +30,14 @@ from flask import (
     url_for,
 )
 
+import llm
 from industries import INDUSTRIES, get_industry, list_industries
 
 APP_DIR = Path(__file__).parent
 DB_PATH = APP_DIR / "leads.db"
 
-MODEL = "claude-sonnet-4-20250514"
-
 app = Flask(__name__)
 app.secret_key = "leads-dev-secret-change-me"
-
-_client = None
-
-
-def client():
-    global _client
-    if _client is None:
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            raise RuntimeError("ANTHROPIC_API_KEY not set")
-        _client = anthropic.Anthropic()
-    return _client
 
 
 # ---------- database ----------
@@ -171,17 +158,8 @@ GRADING:
 
 Return ONLY the JSON, no preamble."""
 
-    response = client().messages.create(
-        model=MODEL,
-        max_tokens=2000,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    text = response.content[0].text.strip()
-    if text.startswith("```"):
-        text = text.split("```")[1]
-        if text.startswith("json"):
-            text = text[4:]
-        text = text.strip()
+    text = llm.complete(prompt, max_tokens=2000)
+    text = llm.extract_json(text)
     try:
         return json.loads(text)
     except json.JSONDecodeError as e:
@@ -212,12 +190,7 @@ SUBJECT: <subject line>
 
 <body>"""
 
-    response = client().messages.create(
-        model=MODEL,
-        max_tokens=800,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return response.content[0].text.strip()
+    return llm.complete(prompt, max_tokens=800)
 
 
 def generate_demo_prompt(company, industry_key, analysis):
@@ -241,12 +214,7 @@ The prompt should specify:
 
 Return a clear, actionable prompt another AI can execute to build the demo. Keep it under 400 words."""
 
-    response = client().messages.create(
-        model=MODEL,
-        max_tokens=1200,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return response.content[0].text.strip()
+    return llm.complete(prompt, max_tokens=1200)
 
 
 def suggest_leads(country, industry_key, count=10):
@@ -268,17 +236,8 @@ Return STRICT JSON array only:
 
 Only return companies you are confident exist. No made-up names."""
 
-    response = client().messages.create(
-        model=MODEL,
-        max_tokens=3000,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    text = response.content[0].text.strip()
-    if text.startswith("```"):
-        text = text.split("```")[1]
-        if text.startswith("json"):
-            text = text[4:]
-        text = text.strip()
+    text = llm.complete(prompt, max_tokens=3000)
+    text = llm.extract_json(text)
     try:
         return json.loads(text)
     except json.JSONDecodeError:
@@ -603,9 +562,14 @@ def export_csv():
 
 if __name__ == "__main__":
     init_db()
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("WARNING: ANTHROPIC_API_KEY not set — AI features will fail.")
-        print("  export ANTHROPIC_API_KEY=sk-ant-...")
+    provider = llm.provider_name()
+    if provider == "none":
+        print("WARNING: No LLM provider configured. Set one of:")
+        print("  export GEMINI_API_KEY=...  (free, from https://aistudio.google.com/apikey)")
+        print("  OR run Ollama:  brew install ollama && ollama pull llama3.1:8b && ollama serve")
+        print("  OR export ANTHROPIC_API_KEY=... (paid)")
+    else:
+        print(f"LLM provider: {provider}")
     port = 5055
     url = f"http://127.0.0.1:{port}"
     print(f"\nLeads Platform running at {url}")
