@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}{{ lead.company }} · Leads Platform{% endblock %}
+{% block content %}
+
+<div style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <h2>{{ lead.company }}</h2>
+    <p class="subtitle">
+      {% if lead.website %}<a href="{{ lead.website }}" target="_blank">{{ lead.website }}</a> · {% endif %}
+      {{ industry.name if industry else lead.industry or 'Unknown industry' }}
+      {% if lead.country %} · {{ lead.country }}{% endif %}
+    </p>
+  </div>
+  <div class="actions-bar">
+    <a href="{{ url_for('lead_edit', lead_id=lead.id) }}" class="btn btn-secondary">Edit</a>
+    <form method="post" action="{{ url_for('lead_delete', lead_id=lead.id) }}" onsubmit="return confirm('Delete this lead?')" style="display:inline;">
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat">
+    <div class="label">Grade</div>
+    <div class="value">{% if lead.grade %}<span class="badge grade-{{ lead.grade }}" style="font-size:20px; padding: 6px 14px;">{{ lead.grade }}</span>{% else %}—{% endif %}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Opportunity Score</div>
+    <div class="value">{{ lead.opportunity_score or 0 }}/100</div>
+  </div>
+  <div class="stat">
+    <div class="label">Status</div>
+    <div class="value"><span class="badge status-{{ lead.status }}" style="font-size:13px; padding: 6px 14px;">{{ lead.status }}</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top: 0;">Contact</h3>
+  <table>
+    <tr><td style="width: 180px; color: #888;">Contact name</td><td>{{ lead.contact_name or '—' }}</td></tr>
+    <tr><td style="color: #888;">Email</td><td>{{ lead.contact_email or '—' }}</td></tr>
+    <tr><td style="color: #888;">Phone</td><td>{{ lead.contact_phone or '—' }}</td></tr>
+    <tr><td style="color: #888;">City</td><td>{{ lead.city or '—' }}</td></tr>
+    <tr><td style="color: #888;">Company size</td><td>{{ lead.company_size or '—' }}</td></tr>
+    <tr><td style="color: #888;">Source</td><td>{{ lead.source or '—' }}</td></tr>
+  </table>
+</div>
+
+{% if lead.ai_assessment %}
+<div class="card">
+  <h3 style="margin-top: 0;">AI Assessment</h3>
+  <pre>{{ lead.ai_assessment }}</pre>
+</div>
+{% endif %}
+
+{% if lead.outreach_email %}
+<div class="card">
+  <h3 style="margin-top: 0;">Outreach Email</h3>
+  <pre>{{ lead.outreach_email }}</pre>
+</div>
+{% endif %}
+
+{% if lead.demo_prompt %}
+<div class="card">
+  <h3 style="margin-top: 0;">Demo Prompt</h3>
+  <pre>{{ lead.demo_prompt }}</pre>
+</div>
+{% endif %}
+
+{% if lead.notes %}
+<div class="card">
+  <h3 style="margin-top: 0;">Notes</h3>
+  <pre>{{ lead.notes }}</pre>
+</div>
+{% endif %}
+
+{% if industry %}
+<div class="card">
+  <h3 style="margin-top: 0;">Industry Playbook: {{ industry.name }}</h3>
+  <p style="color: #888; margin-bottom: 12px;">Key use cases for this sector:</p>
+  {% for uc in industry.use_cases %}
+    <div style="margin-bottom: 12px;">
+      <strong>{{ uc.title }}</strong><br>
+      <span style="color: #b0b0be; font-size: 13px;">{{ uc.description }}</span><br>
+      <span style="color: #4ade80; font-size: 12px;">Impact: {{ uc.impact }}</span>
+    </div>
+  {% endfor %}
+  <p style="color: #888; margin-top: 16px;"><a href="{{ url_for('industry_detail', key=lead.industry) }}">View full playbook →</a></p>
+</div>
+{% endif %}
+
+{% endblock %}

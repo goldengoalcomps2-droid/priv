@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Leads Platform{% endblock %}
+{% block content %}
+
+<h2>Dashboard</h2>
+<p class="subtitle">AI agent consultancy — pipeline at a glance</p>
+
+<div class="stat-grid">
+  <div class="stat">
+    <div class="label">Total Leads</div>
+    <div class="value">{{ stats.total }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Grade A</div>
+    <div class="value">{{ stats.by_grade.get('A', 0) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Grade B</div>
+    <div class="value">{{ stats.by_grade.get('B', 0) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Contacted</div>
+    <div class="value">{{ stats.by_status.get('contacted', 0) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Responded</div>
+    <div class="value">{{ stats.by_status.get('responded', 0) }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top: 0;">By Country</h3>
+  {% if stats.by_country %}
+    <table>
+      <tr><th>Country</th><th>Leads</th></tr>
+      {% for country, count in stats.by_country.items() %}
+        <tr><td>{{ country }}</td><td>{{ count }}</td></tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <div class="empty">No leads yet. Head to the <a href="{{ url_for('generator') }}">Lead Generator</a> to start.</div>
+  {% endif %}
+</div>
+
+<h3>Recent Leads</h3>
+{% if recent %}
+<table>
+  <tr>
+    <th>Company</th>
+    <th>Industry</th>
+    <th>Country</th>
+    <th>Grade</th>
+    <th>Score</th>
+    <th>Status</th>
+  </tr>
+  {% for lead in recent %}
+  <tr>
+    <td><a href="{{ url_for('lead_detail', lead_id=lead.id) }}">{{ lead.company }}</a></td>
+    <td>{{ lead.industry or '—' }}</td>
+    <td>{{ lead.country or '—' }}</td>
+    <td>{% if lead.grade %}<span class="badge grade-{{ lead.grade }}">{{ lead.grade }}</span>{% else %}—{% endif %}</td>
+    <td>{{ lead.opportunity_score or '—' }}</td>
+    <td><span class="badge status-{{ lead.status }}">{{ lead.status }}</span></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="empty">No leads yet.</div>
+{% endif %}
+
+{% endblock %}

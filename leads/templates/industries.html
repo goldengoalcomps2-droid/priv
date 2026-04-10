@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Industries · Leads Platform{% endblock %}
+{% block content %}
+
+<h2>Industry Playbooks</h2>
+<p class="subtitle">Pain points, use cases, and talking points for AI agent consultancy across key sectors</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+  {% for key, data in industries.items() %}
+  <a href="{{ url_for('industry_detail', key=key) }}" class="card" style="display:block; color:inherit; text-decoration:none;">
+    <h3 style="margin:0 0 6px 0; color:#fff;">{{ data.name }}</h3>
+    <p style="color:#888; font-size:12px; margin-bottom:10px;">{{ data.regions | join(' · ') }}</p>
+    <p style="color:#b0b0be; font-size:13px;">{{ data.use_cases|length }} use cases · {{ data.pain_points|length }} pain points</p>
+  </a>
+  {% endfor %}
+</div>
+
+{% endblock %}

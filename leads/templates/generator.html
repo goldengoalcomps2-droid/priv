@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% block title %}Lead Generator · Leads Platform{% endblock %}
+{% block content %}
+
+<h2>Lead Generator</h2>
+<p class="subtitle">Find companies, assess AI opportunity, generate outreach + demo prompts</p>
+
+<div class="card">
+  <h3 style="margin-top: 0;">1. Suggest Target Companies</h3>
+  <p style="color: #888; margin-bottom: 14px;">Get a list of real companies to target in a region + industry.</p>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Country</label>
+      <select id="suggest-country">
+        {% for c in countries %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Industry</label>
+      <select id="suggest-industry">
+        {% for key, name in industries %}<option value="{{ key }}">{{ name }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="suggestLeads()">Suggest 10 Companies</button>
+  <div id="suggest-results" style="margin-top: 16px;"></div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top: 0;">2. Analyze a Specific Company</h3>
+  <p style="color: #888; margin-bottom: 14px;">Deep-dive analysis, grading, and content generation for a single target.</p>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Company name *</label>
+      <input type="text" id="analyze-company" placeholder="Acme Ltd">
+    </div>
+    <div class="form-group">
+      <label>Website (optional)</label>
+      <input type="text" id="analyze-website" placeholder="acme.com">
+    </div>
+    <div class="form-group">
+      <label>Industry</label>
+      <select id="analyze-industry">
+        <option value="">—</option>
+        {% for key, name in industries %}<option value="{{ key }}">{{ name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Country</label>
+      <select id="analyze-country">
+        <option value="">—</option>
+        {% for c in countries %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="analyzeCompany()">Analyze & Grade</button>
+  <div id="analyze-results" style="margin-top: 16px;"></div>
+</div>
+
+<script>
+let currentAnalysis = null;
+let currentCompany = {};
+
+async function suggestLeads() {
+  const country = document.getElementById('suggest-country').value;
+  const industry = document.getElementById('suggest-industry').value;
+  const results = document.getElementById('suggest-results');
+  results.innerHTML = '<p style="color:#888;">Searching...</p>';
+
+  try {
+    const r = await fetch('/api/suggest_leads', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({country, industry, count: 10})
+    });
+    const data = await r.json();
+    if (data.error) {
+      results.innerHTML = '<p style="color:#f87171;">Error: ' + data.error + '</p>';
+      return;
+    }
+    if (!data.leads || data.leads.length === 0) {
+      results.innerHTML = '<p style="color:#888;">No results.</p>';
+      return;
+    }
+    let html = '<table><tr><th>Company</th><th>Website</th><th>City</th><th>Why</th><th>Decision Maker</th><th></th></tr>';
+    for (const lead of data.leads) {
+      html += `<tr>
+        <td><strong>${escape(lead.name)}</strong></td>
+        <td>${lead.website ? '<a href="https://'+escape(lead.website)+'" target="_blank">'+escape(lead.website)+'</a>' : '—'}</td>
+        <td>${escape(lead.city || '—')}</td>
+        <td style="max-width:300px; color:#b0b0be;">${escape(lead.why_good_fit || '')}</td>
+        <td style="color:#888;">${escape(lead.likely_decision_maker_title || '')}</td>
+        <td><button class="btn btn-secondary" onclick='loadIntoAnalyzer(${JSON.stringify(lead).replace(/'/g, "&#39;")})'>Analyze</button></td>
+      </tr>`;
+    }
+    html += '</table>';
+    results.innerHTML = html;
+  } catch (e) {
+    results.innerHTML = '<p style="color:#f87171;">Error: ' + e.message + '</p>';
+  }
+}
+
+function loadIntoAnalyzer(lead) {
+  document.getElementById('analyze-company').value = lead.name || '';
+  document.getElementById('analyze-website').value = lead.website || '';
+  document.getElementById('analyze-industry').value = document.getElementById('suggest-industry').value;
+  document.getElementById('analyze-country').value = document.getElementById('suggest-country').value;
+  document.querySelector('#analyze-results').scrollIntoView({behavior: 'smooth'});
+}
+
+async function analyzeCompany() {
+  const company = document.getElementById('analyze-company').value.trim();
+  const website = document.getElementById('analyze-website').value.trim();
+  const industry = document.getElementById('analyze-industry').value;
+  const country = document.getElementById('analyze-country').value;
+  const results = document.getElementById('analyze-results');
+
+  if (!company) { alert('Enter a company name'); return; }
+  results.innerHTML = '<p style="color:#888;">Analyzing... (fetching website, running Claude)</p>';
+  currentCompany = {company, website, industry, country};
+
+  try {
+    const r = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(currentCompany)
+    });
+    const data = await r.json();
+    if (data.error) {
+      results.innerHTML = '<p style="color:#f87171;">Error: ' + data.error + '</p>';
+      return;
+    }
+    currentAnalysis = data.analysis;
+    renderAnalysis(data.analysis);
+  } catch (e) {
+    results.innerHTML = '<p style="color:#f87171;">Error: ' + e.message + '</p>';
+  }
+}
+
+function renderAnalysis(a) {
+  const results = document.getElementById('analyze-results');
+  let agentsHtml = '';
+  if (a.recommended_agents) {
+    for (const agent of a.recommended_agents) {
+      agentsHtml += `<div style="margin-bottom: 10px; padding: 10px; background: #0d0d14; border-radius: 8px;">
+        <strong>${escape(agent.name)}</strong><br>
+        <span style="color:#b0b0be; font-size:13px;">${escape(agent.why || '')}</span><br>
+        <span style="color:#4ade80; font-size:12px;">${escape(agent.impact || '')}</span>
+      </div>`;
+    }
+  }
+  let hooksHtml = (a.top_3_hooks || []).map(h => `<li>${escape(h)}</li>`).join('');
+  let gapsHtml = (a.gaps || []).map(g => `<li>${escape(g)}</li>`).join('');
+
+  results.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat"><div class="label">Grade</div><div class="value"><span class="badge grade-${a.grade}" style="font-size:20px; padding:6px 14px;">${a.grade}</span></div></div>
+      <div class="stat"><div class="label">Opportunity Score</div><div class="value">${a.opportunity_score}/100</div></div>
+    </div>
+    <h3>Current State</h3>
+    <p style="color:#b0b0be;">${escape(a.current_state || '')}</p>
+    <h3>Gaps</h3>
+    <ul style="padding-left: 20px; color:#b0b0be;">${gapsHtml}</ul>
+    <h3>Recommended Agents</h3>
+    ${agentsHtml}
+    <h3>Top 3 Outreach Hooks</h3>
+    <ul style="padding-left: 20px; color:#b0b0be;">${hooksHtml}</ul>
+    <div class="actions-bar" style="margin-top: 20px;">
+      <button class="btn btn-primary" onclick="generateEmail()">Generate Outreach Email</button>
+      <button class="btn btn-primary" onclick="generateDemo()">Generate Demo Prompt</button>
+      <button class="btn btn-secondary" onclick="saveLead()">Save as Lead</button>
+    </div>
+    <div id="generated-email" style="margin-top: 16px;"></div>
+    <div id="generated-demo" style="margin-top: 16px;"></div>
+  `;
+}
+
+async function generateEmail() {
+  const box = document.getElementById('generated-email');
+  box.innerHTML = '<p style="color:#888;">Generating email...</p>';
+  try {
+    const r = await fetch('/api/generate_email', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({...currentCompany, analysis: currentAnalysis})
+    });
+    const data = await r.json();
+    if (data.error) { box.innerHTML = '<p style="color:#f87171;">'+data.error+'</p>'; return; }
+    currentCompany.outreach_email = data.email;
+    box.innerHTML = '<h3>Outreach Email</h3><pre>'+escape(data.email)+'</pre><button class="btn btn-secondary" onclick="copy(`'+data.email.replace(/`/g, '\\`').replace(/\\/g, '\\\\')+'`)">Copy</button>';
+  } catch (e) {
+    box.innerHTML = '<p style="color:#f87171;">'+e.message+'</p>';
+  }
+}
+
+async function generateDemo() {
+  const box = document.getElementById('generated-demo');
+  box.innerHTML = '<p style="color:#888;">Generating demo prompt...</p>';
+  try {
+    const r = await fetch('/api/generate_demo', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({...currentCompany, analysis: currentAnalysis})
+    });
+    const data = await r.json();
+    if (data.error) { box.innerHTML = '<p style="color:#f87171;">'+data.error+'</p>'; return; }
+    currentCompany.demo_prompt = data.prompt;
+    box.innerHTML = '<h3>Demo Prompt (paste into Claude to build the mock site)</h3><pre>'+escape(data.prompt)+'</pre><button class="btn btn-secondary" onclick="copy(`'+data.prompt.replace(/`/g, '\\`').replace(/\\/g, '\\\\')+'`)">Copy</button>';
+  } catch (e) {
+    box.innerHTML = '<p style="color:#f87171;">'+e.message+'</p>';
+  }
+}
+
+async function saveLead() {
+  try {
+    const r = await fetch('/api/save_lead', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({...currentCompany, analysis: currentAnalysis})
+    });
+    const data = await r.json();
+    if (data.error) { alert(data.error); return; }
+    window.location = data.url;
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+function copy(text) {
+  navigator.clipboard.writeText(text);
+  alert('Copied!');
+}
+
+function escape(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+</script>
+
+{% endblock %}

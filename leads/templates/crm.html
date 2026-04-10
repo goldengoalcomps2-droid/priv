@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}CRM · Leads Platform{% endblock %}
+{% block content %}
+
+<h2>CRM</h2>
+<p class="subtitle">{{ leads|length }} lead{{ 's' if leads|length != 1 }}</p>
+
+<form class="filters" method="get">
+  <input type="text" name="q" value="{{ filters.q }}" placeholder="Search company, contact...">
+  <select name="grade">
+    <option value="">All grades</option>
+    {% for g in ['A','B','C','D'] %}
+      <option value="{{ g }}" {% if filters.grade == g %}selected{% endif %}>{{ g }}</option>
+    {% endfor %}
+  </select>
+  <select name="status">
+    <option value="">All statuses</option>
+    {% for s in ['new','contacted','responded','converted','dead'] %}
+      <option value="{{ s }}" {% if filters.status == s %}selected{% endif %}>{{ s }}</option>
+    {% endfor %}
+  </select>
+  <select name="country">
+    <option value="">All countries</option>
+    {% for c in countries %}
+      <option value="{{ c }}" {% if filters.country == c %}selected{% endif %}>{{ c }}</option>
+    {% endfor %}
+  </select>
+  <select name="industry">
+    <option value="">All industries</option>
+    {% for key, name in industries %}
+      <option value="{{ key }}" {% if filters.industry == key %}selected{% endif %}>{{ name }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-secondary" type="submit">Filter</button>
+  <a class="btn btn-primary" href="{{ url_for('lead_new') }}">+ New Lead</a>
+</form>
+
+{% if leads %}
+<table>
+  <tr>
+    <th>Company</th>
+    <th>Industry</th>
+    <th>Country</th>
+    <th>Contact</th>
+    <th>Grade</th>
+    <th>Score</th>
+    <th>Status</th>
+  </tr>
+  {% for lead in leads %}
+  <tr>
+    <td><a href="{{ url_for('lead_detail', lead_id=lead.id) }}">{{ lead.company }}</a></td>
+    <td>{{ lead.industry or '—' }}</td>
+    <td>{{ lead.country or '—' }}{% if lead.city %}, {{ lead.city }}{% endif %}</td>
+    <td>
+      {% if lead.contact_name %}{{ lead.contact_name }}<br>{% endif %}
+      {% if lead.contact_email %}<span style="color:#888; font-size:12px;">{{ lead.contact_email }}</span>{% endif %}
+    </td>
+    <td>{% if lead.grade %}<span class="badge grade-{{ lead.grade }}">{{ lead.grade }}</span>{% else %}—{% endif %}</td>
+    <td>
+      {{ lead.opportunity_score or 0 }}
+      <div class="score-bar"><div class="score-bar-fill" style="width: {{ lead.opportunity_score or 0 }}%;"></div></div>
+    </td>
+    <td><span class="badge status-{{ lead.status }}">{{ lead.status }}</span></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="card empty">
+  No leads match these filters. Try the <a href="{{ url_for('generator') }}">Lead Generator</a> to add some.
+</div>
+{% endif %}
+
+{% endblock %}

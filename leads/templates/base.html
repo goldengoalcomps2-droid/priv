@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Leads Platform{% endblock %}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    background: #0b0b0f;
+    color: #e4e4e4;
+    font-size: 14px;
+    display: flex;
+  }
+  a { color: #60a5fa; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .sidebar {
+    width: 220px;
+    background: #111117;
+    border-right: 1px solid #1f1f28;
+    padding: 24px 0;
+    flex-shrink: 0;
+    min-height: 100vh;
+  }
+  .sidebar h1 {
+    font-size: 15px;
+    padding: 0 24px 20px;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+  }
+  .sidebar nav a {
+    display: block;
+    padding: 10px 24px;
+    color: #a0a0ae;
+    font-weight: 500;
+  }
+  .sidebar nav a:hover { background: #1a1a24; color: #fff; text-decoration: none; }
+  .sidebar nav a.active { background: #1e293b; color: #fff; border-left: 3px solid #2563eb; padding-left: 21px; }
+  .sidebar .section {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #555;
+    padding: 16px 24px 6px;
+  }
+  main {
+    flex: 1;
+    padding: 32px 40px;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  h2 {
+    font-size: 22px;
+    margin-bottom: 6px;
+    letter-spacing: -0.015em;
+  }
+  h3 {
+    font-size: 15px;
+    margin: 24px 0 12px;
+    color: #c0c0ce;
+  }
+  .subtitle { color: #888; margin-bottom: 24px; font-size: 13px; }
+  .card {
+    background: #14141c;
+    border: 1px solid #1f1f28;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat {
+    background: #14141c;
+    border: 1px solid #1f1f28;
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .stat .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .stat .value { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #14141c;
+    border: 1px solid #1f1f28;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table th, table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #1f1f28;
+  }
+  table th {
+    background: #1a1a24;
+    font-weight: 600;
+    color: #c0c0ce;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  table tr:last-child td { border-bottom: none; }
+  table tr:hover td { background: #18181f; }
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .grade-A { background: #052e16; color: #4ade80; }
+  .grade-B { background: #172554; color: #60a5fa; }
+  .grade-C { background: #422006; color: #fbbf24; }
+  .grade-D { background: #450a0a; color: #f87171; }
+  .status-new { background: #1e293b; color: #94a3b8; }
+  .status-contacted { background: #172554; color: #60a5fa; }
+  .status-responded { background: #052e16; color: #4ade80; }
+  .status-converted { background: #064e3b; color: #34d399; }
+  .status-dead { background: #1a1a24; color: #666; }
+  .btn {
+    display: inline-block;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-secondary { background: #1f1f28; color: #e4e4e4; border: 1px solid #2d2d3a; }
+  .btn-secondary:hover { background: #2a2a36; }
+  .btn-danger { background: #7f1d1d; color: #fecaca; }
+  .btn-danger:hover { background: #991b1b; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; color: #a0a0ae; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: #0d0d14;
+    border: 1px solid #2a2a36;
+    color: #e4e4e4;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .form-grid .form-group { margin-bottom: 0; }
+  .filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .filters input, .filters select {
+    padding: 8px 12px;
+    background: #0d0d14;
+    border: 1px solid #2a2a36;
+    color: #e4e4e4;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .actions-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    align-items: center;
+  }
+  .actions-bar > * + * { margin-left: 0; }
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+  }
+  pre {
+    background: #0d0d14;
+    border: 1px solid #1f1f28;
+    border-radius: 8px;
+    padding: 14px;
+    overflow-x: auto;
+    font-size: 12px;
+    color: #c0c0ce;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .score-bar {
+    display: inline-block;
+    width: 60px;
+    height: 6px;
+    background: #1f1f28;
+    border-radius: 3px;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+  .score-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f87171, #fbbf24, #4ade80);
+  }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <h1>Leads Platform</h1>
+  <nav>
+    <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a>
+    <a href="{{ url_for('crm') }}" class="{% if request.endpoint == 'crm' %}active{% endif %}">CRM</a>
+    <a href="{{ url_for('generator') }}" class="{% if request.endpoint == 'generator' %}active{% endif %}">Lead Generator</a>
+    <a href="{{ url_for('industries_page') }}" class="{% if 'industries' in (request.endpoint or '') %}active{% endif %}">Industries</a>
+    <div class="section">Actions</div>
+    <a href="{{ url_for('lead_new') }}">+ New Lead</a>
+    <a href="{{ url_for('export_csv') }}">Export CSV</a>
+  </nav>
+</aside>
+<main>
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

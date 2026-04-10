@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ industry.name }} · Industries{% endblock %}
+{% block content %}
+
+<p style="margin-bottom: 10px;"><a href="{{ url_for('industries_page') }}">← All industries</a></p>
+<h2>{{ industry.name }}</h2>
+<p class="subtitle">Target regions: {{ industry.regions | join(' · ') }}</p>
+
+<div class="card">
+  <h3 style="margin-top: 0;">Pain Points</h3>
+  <ul style="padding-left: 20px; color: #b0b0be; line-height: 1.8;">
+    {% for pain in industry.pain_points %}
+      <li>{{ pain }}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="card">
+  <h3 style="margin-top: 0;">AI Agent Use Cases</h3>
+  {% for uc in industry.use_cases %}
+  <div style="margin-bottom: 18px; padding: 14px; background: #0d0d14; border-radius: 8px;">
+    <h4 style="color: #fff; margin-bottom: 6px;">{{ uc.title }}</h4>
+    <p style="color: #b0b0be; font-size: 13px; margin-bottom: 6px;">{{ uc.description }}</p>
+    <p style="color: #4ade80; font-size: 12px;">Impact: {{ uc.impact }}</p>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h3 style="margin-top: 0;">Decision Makers to Target</h3>
+  <ul style="padding-left: 20px; color: #b0b0be; line-height: 1.8;">
+    {% for dm in industry.decision_makers %}
+      <li>{{ dm }}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="card">
+  <h3 style="margin-top: 0;">Talking Points for Outreach</h3>
+  <ul style="padding-left: 20px; color: #b0b0be; line-height: 1.8;">
+    {% for tp in industry.talking_points %}
+      <li>{{ tp }}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<a href="{{ url_for('generator') }}?industry={{ key }}" class="btn btn-primary">Find companies in this sector</a>
+
+{% endblock %}
