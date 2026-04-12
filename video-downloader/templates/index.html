@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface-2: #1e1e1e;
+            --border: #2a2a2a;
+            --text: #e5e5e5;
+            --text-dim: #888;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #eab308;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .app {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header h1 span { color: var(--accent); }
+
+        .header p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Download Form */
+        .download-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .url-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 14px 18px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .url-input:focus {
+            border-color: var(--accent);
+        }
+
+        .url-input::placeholder {
+            color: #555;
+        }
+
+        .download-btn {
+            padding: 14px 28px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .download-btn:hover { background: var(--accent-hover); }
+        .download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .options-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .option-group {
+            flex: 1;
+        }
+
+        .option-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .option-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .option-group select:focus {
+            border-color: var(--accent);
+        }
+
+        /* Active Download */
+        .active-download {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dl-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .dl-url {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 80%;
+        }
+
+        .dl-status {
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dl-status.downloading { background: rgba(99,102,241,0.15); color: var(--accent); }
+        .dl-status.complete { background: rgba(34,197,94,0.15); color: var(--green); }
+        .dl-status.error { background: rgba(239,68,68,0.15); color: var(--red); }
+        .dl-status.starting { background: rgba(234,179,8,0.15); color: var(--yellow); }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--surface-2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar-fill.complete { background: var(--green); }
+
+        .dl-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .dl-stats span strong {
+            color: var(--text);
+        }
+
+        .dl-filename {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--green);
+        }
+
+        .dl-error {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--red);
+        }
+
+        /* History */
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 32px 0 16px;
+        }
+
+        .section-title h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .folder-btn {
+            padding: 6px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .folder-btn:hover {
+            color: var(--text);
+            border-color: var(--accent);
+        }
+
+        .history-list {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+
+        .history-item:last-child { border-bottom: none; }
+        .history-item:hover { background: var(--surface-2); }
+
+        .history-name {
+            font-size: 0.85rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 70%;
+        }
+
+        .history-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .history-size {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .history-dl-btn {
+            padding: 4px 12px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--accent);
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .history-dl-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .save-path {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 20px;
+        }
+
+        .save-path strong { color: var(--text); }
+
+        /* Supported sites badge */
+        .sites-info {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 600px) {
+            .url-row { flex-direction: column; }
+            .options-row { flex-direction: column; }
+            .dl-stats { flex-wrap: wrap; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1><span>Video</span> Downloader</h1>
+            <p>Paste any URL. Download any video. YouTube, TikTok, Instagram, Twitter, and 1000+ sites.</p>
+        </div>
+
+        <div class="download-box">
+            <div class="url-row">
+                <input type="text" class="url-input" id="urlInput" placeholder="Paste video URL here..." autofocus>
+                <button class="download-btn" id="downloadBtn" onclick="startDownload()">Download</button>
+            </div>
+            <div class="options-row">
+                <div class="option-group">
+                    <label>Quality</label>
+                    <select id="qualitySelect">
+                        <option value="best">Best Available</option>
+                        <option value="1080">1080p</option>
+                        <option value="720" selected>720p</option>
+                        <option value="480">480p</option>
+                        <option value="audio">Audio Only (MP3)</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label>Format</label>
+                    <select id="formatSelect">
+                        <option value="mp4">MP4</option>
+                        <option value="default">Default</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="sites-info">
+            Supports: YouTube, TikTok, Instagram, Twitter/X, Facebook, Vimeo, Twitch, Reddit, Dailymotion, and 1000+ more
+        </div>
+
+        <div id="activeDownloads"></div>
+
+        <div class="section-title">
+            <h2>Downloaded Files</h2>
+            <button class="folder-btn" onclick="openFolder()">Open Folder</button>
+        </div>
+
+        <div id="historyList" class="history-list">
+            <div class="empty-state">No downloads yet. Paste a URL above to get started.</div>
+        </div>
+
+        <div class="save-path">
+            Saving to: <strong>{{ download_dir }}</strong>
+        </div>
+    </div>
+
+    <script>
+        const activeDownloads = {};
+
+        // Allow Enter key to start download
+        document.getElementById('urlInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') startDownload();
+        });
+
+        async function startDownload() {
+            const urlInput = document.getElementById('urlInput');
+            const url = urlInput.value.trim();
+            if (!url) return;
+
+            const btn = document.getElementById('downloadBtn');
+            btn.disabled = true;
+            btn.textContent = 'Starting...';
+
+            try {
+                const res = await fetch('/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url: url,
+                        quality: document.getElementById('qualitySelect').value,
+                        format: document.getElementById('formatSelect').value
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                activeDownloads[data.id] = { url: url };
+                renderActiveDownload(data.id, url);
+                pollStatus(data.id);
+                urlInput.value = '';
+
+            } catch (err) {
+                alert('Failed to start download: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Download';
+            }
+        }
+
+        function renderActiveDownload(id, url) {
+            const container = document.getElementById('activeDownloads');
+            const div = document.createElement('div');
+            div.className = 'active-download';
+            div.id = `dl-${id}`;
+            div.innerHTML = `
+                <div class="dl-header">
+                    <span class="dl-url">${escapeHtml(url)}</span>
+                    <span class="dl-status starting" id="status-${id}">Starting</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="bar-${id}" style="width: 0%"></div>
+                </div>
+                <div class="dl-stats" id="stats-${id}">
+                    <span>Progress: <strong id="pct-${id}">0%</strong></span>
+                    <span>Speed: <strong id="speed-${id}">-</strong></span>
+                    <span>ETA: <strong id="eta-${id}">-</strong></span>
+                    <span>Size: <strong id="size-${id}">-</strong></span>
+                </div>
+                <div id="extra-${id}"></div>
+            `;
+            container.prepend(div);
+        }
+
+        async function pollStatus(id) {
+            try {
+                const res = await fetch(`/status/${id}`);
+                const data = await res.json();
+
+                // Update status badge
+                const statusEl = document.getElementById(`status-${id}`);
+                if (statusEl) {
+                    statusEl.textContent = data.status;
+                    statusEl.className = `dl-status ${data.status}`;
+                }
+
+                // Update progress bar
+                const bar = document.getElementById(`bar-${id}`);
+                if (bar) {
+                    bar.style.width = `${data.percent || 0}%`;
+                    if (data.status === 'complete') bar.classList.add('complete');
+                }
+
+                // Update stats
+                const pct = document.getElementById(`pct-${id}`);
+                if (pct) pct.textContent = `${Math.round(data.percent || 0)}%`;
+
+                const speed = document.getElementById(`speed-${id}`);
+                if (speed && data.speed) speed.textContent = data.speed;
+
+                const eta = document.getElementById(`eta-${id}`);
+                if (eta && data.eta) eta.textContent = data.eta;
+
+                const size = document.getElementById(`size-${id}`);
+                if (size && data.size) size.textContent = data.size;
+
+                // Show filename on complete
+                const extra = document.getElementById(`extra-${id}`);
+                if (data.status === 'complete' && data.filename && extra) {
+                    extra.innerHTML = `<div class="dl-filename">Saved: ${escapeHtml(data.filename)}</div>`;
+                    loadHistory();
+                } else if (data.status === 'error' && extra) {
+                    extra.innerHTML = `<div class="dl-error">${escapeHtml(data.error)}</div>`;
+                }
+
+                // Keep polling if still downloading
+                if (data.status === 'downloading' || data.status === 'starting') {
+                    setTimeout(() => pollStatus(id), 500);
+                }
+
+            } catch (err) {
+                setTimeout(() => pollStatus(id), 2000);
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch('/history');
+                const files = await res.json();
+
+                const container = document.getElementById('historyList');
+
+                if (files.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No downloads yet. Paste a URL above to get started.</div>';
+                    return;
+                }
+
+                container.innerHTML = files.map(f => `
+                    <div class="history-item">
+                        <span class="history-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+                        <div class="history-meta">
+                            <span class="history-size">${f.size}</span>
+                            <a class="history-dl-btn" href="/file/${encodeURIComponent(f.name)}" download>Save</a>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error('Failed to load history:', err);
+            }
+        }
+
+        async function openFolder() {
+            try {
+                await fetch('/open-folder');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load history on page load
+        loadHistory();
+    </script>
+</body>
+</html>
