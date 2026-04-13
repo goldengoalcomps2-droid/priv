@@ -11,7 +11,7 @@ const STATE_CONFIG = {
   complete: { deskStroke: '#10b981', deskFill: '#1a2332', avatarScale: 1 },
 };
 
-export default function AgentDesk({ agent }) {
+export default function AgentDesk({ agent, onClick }) {
   const { deskX, deskY, color, colorBg, name, role, emoji, avatar, state, task } = agent;
   const cfg = STATE_CONFIG[state] || STATE_CONFIG.idle;
   const [showComplete, setShowComplete] = useState(false);
@@ -30,7 +30,7 @@ export default function AgentDesk({ agent }) {
   const isComplete = state === 'complete';
 
   return (
-    <g transform={`translate(${deskX}, ${deskY})`}>
+    <g transform={`translate(${deskX}, ${deskY})`} onClick={onClick} style={{ cursor: 'pointer' }}>
       {/* Desk surface */}
       <rect x="-55" y="-25" width="110" height="80" rx="6"
         fill={cfg.deskFill}

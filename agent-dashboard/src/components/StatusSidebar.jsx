@@ -29,7 +29,7 @@ function ElapsedTime({ since }) {
   return <span style={{ color: '#64748b', fontSize: '10px', fontFamily: 'monospace' }}>{elapsed}</span>;
 }
 
-export default function StatusSidebar({ agents, cycle }) {
+export default function StatusSidebar({ agents, cycle, onAgentClick }) {
   const working = agents.filter(a => a.state === 'working' || a.state === 'collaborating').length;
   const completed = agents.reduce((s, a) => s + a.completedCount, 0);
 
@@ -73,13 +73,14 @@ export default function StatusSidebar({ agents, cycle }) {
         {agents.map(agent => {
           const sl = STATE_LABELS[agent.state] || STATE_LABELS.idle;
           return (
-            <div key={agent.id} className="anim-slide" style={{
+            <div key={agent.id} className="anim-slide" onClick={() => onAgentClick && onAgentClick(agent.id)} style={{
               background: '#1a2332',
               border: `1px solid ${agent.state === 'idle' ? '#1e3a5f' : agent.color + '40'}`,
               borderRadius: '8px',
               padding: '10px 12px',
               marginBottom: '6px',
               transition: 'all 0.3s ease',
+              cursor: 'pointer',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

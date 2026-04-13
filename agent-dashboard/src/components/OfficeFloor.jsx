@@ -5,7 +5,7 @@ import OfficeFurniture from './OfficeFurniture';
 import AgentDesk from './AgentDesk';
 import CollaborationLines from './CollaborationLines';
 
-export default function OfficeFloor({ agents, collaborations }) {
+export default function OfficeFloor({ agents, collaborations, onAgentClick }) {
   return (
     <div style={{
       flex: 1,
@@ -71,7 +71,7 @@ export default function OfficeFloor({ agents, collaborations }) {
         <OfficeFurniture />
         <CollaborationLines collaborations={collaborations} agents={agents} />
         {agents.map(agent => (
-          <AgentDesk key={agent.id} agent={agent} />
+          <AgentDesk key={agent.id} agent={agent} onClick={() => onAgentClick && onAgentClick(agent.id)} />
         ))}
       </svg>
     </div>
