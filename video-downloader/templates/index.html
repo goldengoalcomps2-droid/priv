@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Downloader - Download from any website</title>
     <meta name="description" content="Free online video downloader. Download videos from YouTube, TikTok, Instagram, Twitter and 1000+ websites. No signup required.">
+
+    <!-- Google AdSense - Replace ca-pub-XXXXXXX with your AdSense publisher ID -->
+    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -53,6 +57,86 @@
             color: var(--text-dim);
             font-size: 0.95rem;
             line-height: 1.6;
+        }
+
+        /* Ad Slots */
+        .ad-slot {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .ad-slot-label {
+            font-size: 0.65rem;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* VPN Promo */
+        .vpn-promo {
+            background: linear-gradient(135deg, #1a1a3e, #1e293b);
+            border: 1px solid #2d3a5c;
+            border-radius: 14px;
+            padding: 28px;
+            margin: 28px 0;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .vpn-promo-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        .vpn-promo-content { flex: 1; }
+
+        .vpn-promo h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .vpn-promo h3 strong {
+            color: var(--green);
+        }
+
+        .vpn-promo p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .vpn-btn {
+            display: inline-block;
+            padding: 10px 22px;
+            background: var(--green);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .vpn-btn:hover { opacity: 0.85; }
+
+        .vpn-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            margin-left: 8px;
         }
 
         /* Download Form */
@@ -246,7 +330,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
-            margin-top: 48px;
+            margin-top: 32px;
         }
 
         .feature {
@@ -273,6 +357,91 @@
             line-height: 1.5;
         }
 
+        /* How It Works */
+        .how-it-works {
+            margin-top: 48px;
+        }
+
+        .how-it-works h2 {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 24px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .step-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+
+        .step-card h4 {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .step-card p {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        /* FAQ for SEO */
+        .faq {
+            margin-top: 48px;
+        }
+
+        .faq h2 {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 24px;
+        }
+
+        .faq-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .faq-item:hover { border-color: #3a3a3a; }
+
+        .faq-q {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .faq-a {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -285,12 +454,26 @@
 
         .footer p { margin-bottom: 4px; }
 
+        .footer-links {
+            margin-top: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-dim);
+            margin: 0 8px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover { color: var(--text); }
+
         @media (max-width: 600px) {
             .url-row { flex-direction: column; }
             .options-row { flex-direction: column; }
             .dl-stats { flex-wrap: wrap; gap: 8px; }
             .features { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; }
             .header h1 { font-size: 1.6rem; }
+            .vpn-promo { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
@@ -299,6 +482,14 @@
         <div class="header">
             <h1><span>Video</span> Downloader</h1>
             <p>Download videos from any website. Free, fast, no signup required.</p>
+        </div>
+
+        <!-- AD SLOT 1: Top banner (above download box) -->
+        <div class="ad-slot" id="ad-top">
+            <!-- Google AdSense responsive ad unit -->
+            <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
+            <span class="ad-slot-label">Advertisement</span>
         </div>
 
         <div class="download-box">
@@ -333,6 +524,25 @@
 
         <div id="activeDownloads"></div>
 
+        <!-- VPN AFFILIATE PROMO (shows after download completes too) -->
+        <div class="vpn-promo" id="vpnPromo">
+            <div class="vpn-promo-icon">&#128737;</div>
+            <div class="vpn-promo-content">
+                <h3>Protect your privacy with <strong>NordVPN</strong></h3>
+                <p>Download videos anonymously. Hide your IP, bypass geo-blocks, and stay safe online. 72% off + 3 months free.</p>
+                <!-- REPLACE href with your NordVPN affiliate link from https://nordvpn.com/affiliate/ -->
+                <a href="#YOUR_NORDVPN_AFFILIATE_LINK" class="vpn-btn" target="_blank" rel="noopener" id="vpnLink">Get NordVPN Deal</a>
+                <span class="vpn-badge">Sponsored</span>
+            </div>
+        </div>
+
+        <!-- AD SLOT 2: Mid-page -->
+        <div class="ad-slot" id="ad-mid">
+            <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
+            <span class="ad-slot-label">Advertisement</span>
+        </div>
+
         <div class="features">
             <div class="feature">
                 <div class="feature-icon">&#9889;</div>
@@ -346,14 +556,89 @@
             </div>
             <div class="feature">
                 <div class="feature-icon">&#128274;</div>
-                <h3>No Signup</h3>
-                <p>Completely free. No account needed. No ads.</p>
+                <h3>100% Free</h3>
+                <p>Completely free. No account needed. No limits.</p>
             </div>
         </div>
 
+        <!-- How It Works (helps SEO) -->
+        <div class="how-it-works">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <h4>Copy the URL</h4>
+                    <p>Copy the video link from YouTube, TikTok, Instagram, or any website.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <h4>Paste & Download</h4>
+                    <p>Paste the URL above, choose your quality, and hit Download.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <h4>Save to Device</h4>
+                    <p>Click "Save to Your Device" when ready. It's saved to your phone or computer.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AD SLOT 3: Below How It Works -->
+        <div class="ad-slot" id="ad-bottom">
+            <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
+            <span class="ad-slot-label">Advertisement</span>
+        </div>
+
+        <!-- FAQ Section (SEO juice - targets long-tail keywords) -->
+        <div class="faq">
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <div class="faq-q">How do I download a YouTube video?</div>
+                <div class="faq-a">Copy the YouTube video URL from your browser or the YouTube app, paste it into the box above, select your preferred quality (720p, 1080p, or Best), and click Download. Once processing is complete, click "Save to Your Device" to save it.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Can I download TikTok videos without a watermark?</div>
+                <div class="faq-a">Yes! Our downloader fetches the highest quality version available. For most TikTok videos, this will be the clean version. Simply paste the TikTok video link and download as usual.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Is this video downloader free?</div>
+                <div class="faq-a">Yes, 100% free. No signup, no account, no hidden fees. Just paste a URL and download. We support over 1,000 websites including YouTube, TikTok, Instagram, Twitter/X, Facebook, Vimeo, and many more.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Can I download audio only (MP3)?</div>
+                <div class="faq-a">Yes! Select "Audio Only (MP3)" from the Quality dropdown before clicking Download. This will extract the audio track and save it as a high-quality MP3 file - perfect for music and podcasts.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">What video quality options are available?</div>
+                <div class="faq-a">We offer Best Available, 1080p (Full HD), 720p (HD), 480p (SD), and Audio Only (MP3). The actual quality depends on what the original video offers - if a video was uploaded in 720p, selecting 1080p will download it at 720p.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Which websites are supported?</div>
+                <div class="faq-a">We support over 1,000 websites including YouTube, TikTok, Instagram, Twitter/X, Facebook, Reddit, Vimeo, Twitch, Dailymotion, SoundCloud, Tumblr, and many more. If a website hosts video or audio content, there's a good chance we support it.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">How long are my downloads stored?</div>
+                <div class="faq-a">Downloaded files are temporarily stored on our servers for 10 minutes. Make sure to click "Save to Your Device" promptly after your download completes. After 10 minutes, files are automatically deleted for privacy and storage reasons.</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
         <div class="footer">
             <p>Files are automatically deleted after 10 minutes. Save them promptly.</p>
-            <p>For personal use only. Respect copyright.</p>
+            <p>For personal use only. Respect copyright and the content creator's rights.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact</a>
+            </div>
         </div>
     </div>
 
