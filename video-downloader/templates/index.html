@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Downloader</title>
+    <title>Video Downloader - Download from any website</title>
+    <meta name="description" content="Free online video downloader. Download videos from YouTube, TikTok, Instagram, Twitter and 1000+ websites. No signup required.">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -40,7 +41,7 @@
         }
 
         .header h1 {
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             font-weight: 700;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
@@ -50,7 +51,8 @@
 
         .header p {
             color: var(--text-dim);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
         /* Download Form */
@@ -80,13 +82,8 @@
             transition: border-color 0.2s;
         }
 
-        .url-input:focus {
-            border-color: var(--accent);
-        }
-
-        .url-input::placeholder {
-            color: #555;
-        }
+        .url-input:focus { border-color: var(--accent); }
+        .url-input::placeholder { color: #555; }
 
         .download-btn {
             padding: 14px 28px;
@@ -102,19 +99,14 @@
         }
 
         .download-btn:hover { background: var(--accent-hover); }
-        .download-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .download-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .options-row {
             display: flex;
             gap: 12px;
         }
 
-        .option-group {
-            flex: 1;
-        }
+        .option-group { flex: 1; }
 
         .option-group label {
             display: block;
@@ -137,9 +129,7 @@
             cursor: pointer;
         }
 
-        .option-group select:focus {
-            border-color: var(--accent);
-        }
+        .option-group select:focus { border-color: var(--accent); }
 
         /* Active Download */
         .active-download {
@@ -147,6 +137,7 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
+            margin-top: 16px;
             margin-bottom: 12px;
             animation: fadeIn 0.3s ease;
         }
@@ -169,7 +160,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 80%;
+            max-width: 75%;
         }
 
         .dl-status {
@@ -211,13 +202,11 @@
             color: var(--text-dim);
         }
 
-        .dl-stats span strong {
-            color: var(--text);
-        }
+        .dl-stats span strong { color: var(--text); }
 
         .dl-filename {
-            margin-top: 8px;
-            font-size: 0.8rem;
+            margin-top: 10px;
+            font-size: 0.85rem;
             color: var(--green);
         }
 
@@ -227,108 +216,24 @@
             color: var(--red);
         }
 
-        /* History */
-        .section-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 32px 0 16px;
-        }
-
-        .section-title h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .folder-btn {
-            padding: 6px 14px;
-            background: var(--surface-2);
-            border: 1px solid var(--border);
+        .save-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 10px 24px;
+            background: var(--green);
+            color: #fff;
+            border: none;
             border-radius: 8px;
-            color: var(--text-dim);
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .folder-btn:hover {
-            color: var(--text);
-            border-color: var(--accent);
-        }
-
-        .history-list {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--border);
-            transition: background 0.15s;
-        }
-
-        .history-item:last-child { border-bottom: none; }
-        .history-item:hover { background: var(--surface-2); }
-
-        .history-name {
-            font-size: 0.85rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 70%;
-        }
-
-        .history-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .history-size {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-        }
-
-        .history-dl-btn {
-            padding: 4px 12px;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--accent);
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.2s;
         }
 
-        .history-dl-btn:hover {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
+        .save-btn:hover { opacity: 0.85; }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-dim);
-            font-size: 0.9rem;
-        }
-
-        .save-path {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            margin-top: 20px;
-        }
-
-        .save-path strong { color: var(--text); }
-
-        /* Supported sites badge */
+        /* Supported sites */
         .sites-info {
             text-align: center;
             margin-top: 12px;
@@ -336,10 +241,56 @@
             color: var(--text-dim);
         }
 
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 48px;
+        }
+
+        .feature {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .feature h3 {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .feature p {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .footer p { margin-bottom: 4px; }
+
         @media (max-width: 600px) {
             .url-row { flex-direction: column; }
             .options-row { flex-direction: column; }
             .dl-stats { flex-wrap: wrap; gap: 8px; }
+            .features { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.6rem; }
         }
     </style>
 </head>
@@ -347,7 +298,7 @@
     <div class="app">
         <div class="header">
             <h1><span>Video</span> Downloader</h1>
-            <p>Paste any URL. Download any video. YouTube, TikTok, Instagram, Twitter, and 1000+ sites.</p>
+            <p>Download videos from any website. Free, fast, no signup required.</p>
         </div>
 
         <div class="download-box">
@@ -382,24 +333,31 @@
 
         <div id="activeDownloads"></div>
 
-        <div class="section-title">
-            <h2>Downloaded Files</h2>
-            <button class="folder-btn" onclick="openFolder()">Open Folder</button>
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">&#9889;</div>
+                <h3>Lightning Fast</h3>
+                <p>Downloads start instantly. No waiting, no queues.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">&#127758;</div>
+                <h3>1000+ Sites</h3>
+                <p>YouTube, TikTok, Instagram, Twitter, and more.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">&#128274;</div>
+                <h3>No Signup</h3>
+                <p>Completely free. No account needed. No ads.</p>
+            </div>
         </div>
 
-        <div id="historyList" class="history-list">
-            <div class="empty-state">No downloads yet. Paste a URL above to get started.</div>
-        </div>
-
-        <div class="save-path">
-            Saving to: <strong>{{ download_dir }}</strong>
+        <div class="footer">
+            <p>Files are automatically deleted after 10 minutes. Save them promptly.</p>
+            <p>For personal use only. Respect copyright.</p>
         </div>
     </div>
 
     <script>
-        const activeDownloads = {};
-
-        // Allow Enter key to start download
         document.getElementById('urlInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') startDownload();
         });
@@ -431,7 +389,6 @@
                     return;
                 }
 
-                activeDownloads[data.id] = { url: url };
                 renderActiveDownload(data.id, url);
                 pollStatus(data.id);
                 urlInput.value = '';
@@ -473,21 +430,18 @@
                 const res = await fetch(`/status/${id}`);
                 const data = await res.json();
 
-                // Update status badge
                 const statusEl = document.getElementById(`status-${id}`);
                 if (statusEl) {
                     statusEl.textContent = data.status;
                     statusEl.className = `dl-status ${data.status}`;
                 }
 
-                // Update progress bar
                 const bar = document.getElementById(`bar-${id}`);
                 if (bar) {
                     bar.style.width = `${data.percent || 0}%`;
                     if (data.status === 'complete') bar.classList.add('complete');
                 }
 
-                // Update stats
                 const pct = document.getElementById(`pct-${id}`);
                 if (pct) pct.textContent = `${Math.round(data.percent || 0)}%`;
 
@@ -500,16 +454,17 @@
                 const size = document.getElementById(`size-${id}`);
                 if (size && data.size) size.textContent = data.size;
 
-                // Show filename on complete
                 const extra = document.getElementById(`extra-${id}`);
                 if (data.status === 'complete' && data.filename && extra) {
-                    extra.innerHTML = `<div class="dl-filename">Saved: ${escapeHtml(data.filename)}</div>`;
-                    loadHistory();
+                    const cleanName = data.filename.replace(/^[a-f0-9]{8}_/, '');
+                    extra.innerHTML = `
+                        <div class="dl-filename">Ready: ${escapeHtml(cleanName)}</div>
+                        <a class="save-btn" href="/file/${encodeURIComponent(data.filename)}" download="${escapeHtml(cleanName)}">Save to Your Device</a>
+                    `;
                 } else if (data.status === 'error' && extra) {
                     extra.innerHTML = `<div class="dl-error">${escapeHtml(data.error)}</div>`;
                 }
 
-                // Keep polling if still downloading
                 if (data.status === 'downloading' || data.status === 'starting') {
                     setTimeout(() => pollStatus(id), 500);
                 }
@@ -519,49 +474,11 @@
             }
         }
 
-        async function loadHistory() {
-            try {
-                const res = await fetch('/history');
-                const files = await res.json();
-
-                const container = document.getElementById('historyList');
-
-                if (files.length === 0) {
-                    container.innerHTML = '<div class="empty-state">No downloads yet. Paste a URL above to get started.</div>';
-                    return;
-                }
-
-                container.innerHTML = files.map(f => `
-                    <div class="history-item">
-                        <span class="history-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
-                        <div class="history-meta">
-                            <span class="history-size">${f.size}</span>
-                            <a class="history-dl-btn" href="/file/${encodeURIComponent(f.name)}" download>Save</a>
-                        </div>
-                    </div>
-                `).join('');
-
-            } catch (err) {
-                console.error('Failed to load history:', err);
-            }
-        }
-
-        async function openFolder() {
-            try {
-                await fetch('/open-folder');
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-
-        // Load history on page load
-        loadHistory();
     </script>
 </body>
 </html>
