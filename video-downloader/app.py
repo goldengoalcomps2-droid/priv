@@ -6,9 +6,18 @@ import sys
 import re
 import time
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, make_response
 
 app = Flask(__name__)
+
+
+@app.after_request
+def add_pwa_headers(response):
+    """Add headers required for PWA features."""
+    if request.path == "/static/sw.js":
+        response.headers["Service-Worker-Allowed"] = "/"
+        response.headers["Cache-Control"] = "no-cache"
+    return response
 
 # Downloads folder - always use local ./downloads on server
 DOWNLOAD_DIR = Path(__file__).parent / "downloads"

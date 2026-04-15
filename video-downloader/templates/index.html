@@ -2,9 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Downloader - Download from any website</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SnapVid - Download videos from any website</title>
     <meta name="description" content="Free online video downloader. Download videos from YouTube, TikTok, Instagram, Twitter and 1000+ websites. No signup required.">
+
+    <!-- PWA Manifest & Theme -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SnapVid">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon.png">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/static/icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/static/icons/icon-512.png">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content="SnapVid - Free Video Downloader">
+    <meta property="og:description" content="Download videos from YouTube, TikTok, Instagram and 1000+ sites. Free, fast, no signup.">
+    <meta property="og:image" content="/static/icons/icon-512.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
 
     <!-- Google AdSense - Replace ca-pub-XXXXXXX with your AdSense publisher ID -->
     <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
@@ -466,6 +487,114 @@
 
         .footer-links a:hover { color: var(--text); }
 
+        /* Install App Banner */
+        .install-banner {
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--accent);
+            color: white;
+            padding: 14px 18px;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideUp 0.4s ease;
+        }
+
+        .install-banner.show { display: flex; }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .install-icon {
+            flex-shrink: 0;
+            font-size: 1.5rem;
+        }
+
+        .install-content {
+            flex: 1;
+        }
+
+        .install-content strong {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .install-content span {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .install-btn {
+            background: white;
+            color: var(--accent);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .install-close {
+            background: transparent;
+            border: none;
+            color: white;
+            opacity: 0.7;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px;
+        }
+
+        /* Get the app section */
+        .get-app-section {
+            background: linear-gradient(135deg, #1a1a3e, #1e293b);
+            border: 1px solid #2d3a5c;
+            border-radius: 14px;
+            padding: 28px;
+            margin: 28px 0;
+            text-align: center;
+        }
+
+        .get-app-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .get-app-section p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        .get-app-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .get-app-btn:hover { background: var(--accent-hover); }
+
         @media (max-width: 600px) {
             .url-row { flex-direction: column; }
             .options-row { flex-direction: column; }
@@ -541,6 +670,15 @@
             <!-- <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
             <span class="ad-slot-label">Advertisement</span>
+        </div>
+
+        <!-- Get the App section -->
+        <div class="get-app-section" id="getAppSection">
+            <h3>Get SnapVid on Your Phone</h3>
+            <p>Install SnapVid as an app on your Android or iPhone. No Play Store needed. Works offline, launches from your home screen, and downloads 3x faster.</p>
+            <button class="get-app-btn" id="installAppBtn" onclick="installApp()">
+                <span>&#128241;</span> Install App
+            </button>
         </div>
 
         <div class="features">
@@ -642,7 +780,88 @@
         </div>
     </div>
 
+    <!-- Install App Banner (floats at bottom) -->
+    <div class="install-banner" id="installBanner">
+        <div class="install-icon">&#128241;</div>
+        <div class="install-content">
+            <strong>Install SnapVid App</strong>
+            <span>Faster downloads. Works offline.</span>
+        </div>
+        <button class="install-btn" onclick="installApp()">Install</button>
+        <button class="install-close" onclick="dismissInstall()">&#10005;</button>
+    </div>
+
     <script>
+        // ===== PWA Install Handling =====
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show install banner if not dismissed recently
+            const dismissed = localStorage.getItem('installDismissed');
+            if (!dismissed || Date.now() - parseInt(dismissed) > 7 * 24 * 60 * 60 * 1000) {
+                setTimeout(() => {
+                    document.getElementById('installBanner').classList.add('show');
+                }, 3000);
+            }
+        });
+
+        async function installApp() {
+            if (!deferredPrompt) {
+                // iOS or already installed - show instructions
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                if (isIOS) {
+                    alert('To install: Tap the Share button in Safari, then tap "Add to Home Screen".');
+                } else {
+                    alert('To install: Tap the menu (3 dots) in your browser, then tap "Install App" or "Add to Home Screen".');
+                }
+                return;
+            }
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('installBanner').classList.remove('show');
+                document.getElementById('getAppSection').style.display = 'none';
+            }
+            deferredPrompt = null;
+        }
+
+        function dismissInstall() {
+            document.getElementById('installBanner').classList.remove('show');
+            localStorage.setItem('installDismissed', Date.now().toString());
+        }
+
+        // Hide install section if already running as installed app
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true) {
+                const section = document.getElementById('getAppSection');
+                if (section) section.style.display = 'none';
+            }
+        });
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+            });
+        }
+
+        // Handle shared URLs (from Android Share menu)
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const sharedUrl = params.get('url') || params.get('text');
+            if (sharedUrl) {
+                const input = document.getElementById('urlInput');
+                if (input) {
+                    input.value = sharedUrl;
+                    // Auto-start download if URL was shared
+                    setTimeout(() => startDownload(), 500);
+                }
+            }
+        });
+
         document.getElementById('urlInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') startDownload();
         });
