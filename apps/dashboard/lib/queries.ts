@@ -265,3 +265,108 @@ export async function activeFinesSummary() {
   ]);
   return { unmatched, matched, charged, challengeReady };
 }
+
+export async function customersList() {
+  const customers = await prisma.customer.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { hires: { select: { totalGbp: true, status: true } } },
+  });
+  return customers.map((c) => {
+    const billable = c.hires.filter((h) => h.status === HireStatus.ACTIVE || h.status === HireStatus.COMPLETED);
+    const lifetimeGbpPence = billable.reduce((s, h) => s + h.totalGbp, 0);
+    return { customer: c, rentalCount: billable.length, lifetimeGbpPence };
+  });
+}
+
+export async function customerSummary() {
+  const [total, repeat3, blacklisted, lifetimeAgg] = await Promise.all([
+    prisma.customer.count({ where: { pseudonymisedAt: null } }),
+    prisma.customer
+      .findMany({ select: { id: true, hires: { where: { status: { in: [HireStatus.ACTIVE, HireStatus.COMPLETED] } }, select: { id: true } } } })
+      .then((rows) => rows.filter((r) => r.hires.length >= 3).length),
+    prisma.customer.count({ where: { blacklisted: true } }),
+    prisma.hire.aggregate({ _sum: { totalGbp: true }, where: { status: { in: [HireStatus.ACTIVE, HireStatus.COMPLETED] } } }),
+  ]);
+  return { total, repeat3, blacklisted, lifetimeGbpPence: lifetimeAgg._sum.totalGbp ?? 0 };
+}
+
+export async function finesSummary() {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const [outstandingRows, collectedRows, disputedRows, thisMonthRows] = await Promise.all([
+    prisma.fine.findMany({
+      where: { status: { in: [FineStatus.RECEIVED, FineStatus.MATCHED, FineStatus.CHALLENGE_PREPARED] } },
+      select: { amountGbp: true, adminFeeGbp: true },
+    }),
+    prisma.fine.findMany({
+      where: { status: FineStatus.CHARGED_TO_CUSTOMER },
+      select: { amountGbp: true, adminFeeGbp: true },
+    }),
+    prisma.fine.count({ where: { status: { in: [FineStatus.CHALLENGE_SUBMITTED, FineStatus.CHALLENGE_PREPARED] } } }),
+    prisma.fine.findMany({
+      where: { receivedAt: { gte: monthStart } },
+      select: { amountGbp: true, adminFeeGbp: true, location: true },
+    }),
+  ]);
+  const sum = (rows: { amountGbp: number; adminFeeGbp: number }[]) => rows.reduce((s, r) => s + r.amountGbp + r.adminFeeGbp, 0);
+  // Top location this month
+  const counts = new Map<string, number>();
+  for (const r of thisMonthRows) {
+    const city = r.location.split(",").pop()?.trim() ?? "—";
+    counts.set(city, (counts.get(city) ?? 0) + 1);
+  }
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
+  return {
+    outstandingGbpPence: sum(outstandingRows),
+    outstandingCount: outstandingRows.length,
+    collectedGbpPence: sum(collectedRows),
+    collectedCount: collectedRows.length,
+    disputedCount: disputedRows,
+    thisMonthGbpPence: sum(thisMonthRows),
+    thisMonthCount: thisMonthRows.length,
+    topLocation: top,
+  };
+}
+
+export async function finesList(limit = 50) {
+  const fines = await prisma.fine.findMany({
+    orderBy: { offenceAt: "desc" },
+    take: limit,
+    include: {
+      vehicle: { select: { make: true, model: true, trim: true, vrn: true } },
+      customer: { select: { fullName: true } },
+    },
+  });
+  return fines;
+}
+
+export async function maintenanceBuckets() {
+  const now = new Date();
+  const soon = new Date(now.getTime() + 30 * 86_400_000);
+  const vehicles = await prisma.vehicle.findMany({ where: { status: { not: VehicleStatus.SOLD } } });
+  const overdue: typeof vehicles = [];
+  const dueSoon: typeof vehicles = [];
+  const allGood: typeof vehicles = [];
+  for (const v of vehicles) {
+    const motOverdue = v.motDue && v.motDue < now;
+    const insOverdue = v.insuranceDue && v.insuranceDue < now;
+    const motSoon = v.motDue && v.motDue >= now && v.motDue <= soon;
+    const insSoon = v.insuranceDue && v.insuranceDue >= now && v.insuranceDue <= soon;
+    if (motOverdue || insOverdue) overdue.push(v);
+    else if (motSoon || insSoon) dueSoon.push(v);
+    else allGood.push(v);
+  }
+  return { overdue, dueSoon, allGood };
+}
+
+export async function rentalsList(opts: { status?: HireStatus | "ALL" } = {}) {
+  return prisma.hire.findMany({
+    where: opts.status && opts.status !== "ALL" ? { status: opts.status } : {},
+    orderBy: { startDate: "desc" },
+    include: {
+      customer: { select: { fullName: true } },
+      vehicle: { select: { make: true, model: true, trim: true, vrn: true } },
+    },
+    take: 100,
+  });
+}

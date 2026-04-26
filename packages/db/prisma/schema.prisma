@@ -69,6 +69,10 @@ model Customer {
   livenessScore         Float?
   onboardingFlags       String[]  @default([])
   onboardingStatus      OnboardingStatus @default(PENDING_REVIEW)
+  // Risk management
+  blacklisted           Boolean   @default(false)
+  blacklistReason       String?
+  blacklistedAt         DateTime?
   // Soft-delete / right-to-erasure
   deletionRequestedAt   DateTime?
   pseudonymisedAt       DateTime?
