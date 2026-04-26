@@ -1,0 +1,14 @@
+{
+  "name": "openclaw-monitor",
+  "version": "1.0.0",
+  "description": "Performance monitor and watchdog for OpenClaw gateway",
+  "main": "monitor.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node monitor.mjs",
+    "daemon": "node monitor.mjs --daemon"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}
