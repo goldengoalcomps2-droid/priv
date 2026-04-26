@@ -5,8 +5,11 @@
   "main": "monitor.mjs",
   "type": "module",
   "scripts": {
-    "start": "node monitor.mjs",
-    "daemon": "node monitor.mjs --daemon"
+    "fix": "node fix-openclaw.mjs",
+    "fix:dry": "node fix-openclaw.mjs --dry-run",
+    "fix:verbose": "node fix-openclaw.mjs --verbose",
+    "diagnose": "node diagnose-slow.mjs",
+    "monitor": "node monitor.mjs"
   },
   "dependencies": {
     "ws": "^8.16.0"
