@@ -203,6 +203,59 @@ export async function pendingApprovals() {
   return prisma.approval.findMany({ where: { status: "PENDING" }, orderBy: { createdAt: "desc" }, take: 12 });
 }
 
+export async function timelineRows(opts: { from: Date; to: Date; q?: string; vehicleClass?: string }) {
+  const { from, to, q, vehicleClass } = opts;
+  const vehicles = await prisma.vehicle.findMany({
+    where: {
+      status: { not: VehicleStatus.SOLD },
+      ...(vehicleClass && vehicleClass !== "ALL" ? { vehicleClass: vehicleClass as never } : {}),
+      ...(q
+        ? {
+            OR: [
+              { vrn: { contains: q, mode: "insensitive" } },
+              { make: { contains: q, mode: "insensitive" } },
+              { model: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: [{ make: "asc" }, { model: "asc" }],
+    include: {
+      hires: {
+        where: { startDate: { lte: to }, endDate: { gte: from } },
+        orderBy: { startDate: "asc" },
+        include: { customer: { select: { fullName: true } } },
+      },
+    },
+  });
+  // Window utilisation per vehicle
+  const windowMs = to.getTime() - from.getTime();
+  const rows = vehicles.map((v) => {
+    const days = v.hires
+      .filter((h) => h.status === HireStatus.ACTIVE || h.status === HireStatus.COMPLETED)
+      .reduce((s, h) => {
+        const a = h.startDate > from ? h.startDate : from;
+        const b = h.endDate < to ? h.endDate : to;
+        return s + Math.max(0, b.getTime() - a.getTime());
+      }, 0);
+    const utilisation = windowMs === 0 ? 0 : days / windowMs;
+    return { vehicle: v, hires: v.hires, utilisation };
+  });
+  // Overall window utilisation
+  const totalActive = rows.reduce((s, r) => {
+    const dur = r.hires.reduce((acc, h) => {
+      if (h.status !== HireStatus.ACTIVE && h.status !== HireStatus.COMPLETED) return acc;
+      const a = h.startDate > from ? h.startDate : from;
+      const b = h.endDate < to ? h.endDate : to;
+      return acc + Math.max(0, b.getTime() - a.getTime());
+    }, 0);
+    return s + dur;
+  }, 0);
+  const totalWindow = rows.length * windowMs;
+  const fleetUtilisation = totalWindow === 0 ? 0 : totalActive / totalWindow;
+  return { rows, fleetUtilisation };
+}
+
 export async function activeFinesSummary() {
   const [unmatched, matched, charged, challengeReady] = await Promise.all([
     prisma.fine.count({ where: { status: FineStatus.RECEIVED } }),
