@@ -1,0 +1,28 @@
+{
+  "name": "fleetpro",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FleetPro — multi-agent dashboard for a UK salvage vehicle hire business",
+  "packageManager": "pnpm@9.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter=./apps/* dev",
+    "dev:dashboard": "pnpm --filter @fleetpro/dashboard dev",
+    "dev:portal": "pnpm --filter @fleetpro/customer-portal dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:generate": "pnpm --filter @fleetpro/db generate",
+    "db:migrate": "pnpm --filter @fleetpro/db migrate",
+    "db:seed": "pnpm --filter @fleetpro/db seed",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "typescript": "^5.6.0",
+    "prettier": "^3.3.0"
+  }
+}

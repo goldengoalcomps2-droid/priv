@@ -1,0 +1,541 @@
+// FleetPro — Prisma schema
+// Covers all six business domains: customers, hires, fines/PCN, fleet
+// maintenance (MOT/tax/service), procurement, analytics/defleet.
+//
+// GDPR notes:
+//   * Customer.consentText + consentSignedAt + consentSignatureSvg are
+//     captured at sign-up and immutable thereafter.
+//   * Customer.deletionRequestedAt drives right-to-erasure: nightly job
+//     pseudonymises personal fields and removes licence images from S3.
+//   * LicenceImage stores S3 KMS-encrypted object keys, never raw bytes.
+//   * AgentActivity stores every agent decision and tool call for audit.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Identity & RBAC ────────────────────────────────────────────────────
+
+enum UserRole {
+  OWNER
+  ADMIN
+  CUSTOMER_PORTAL
+}
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  name          String
+  role          UserRole    @default(ADMIN)
+  passwordHash  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  approvals     Approval[]  @relation("ApprovalReviewer")
+  activityNotes AgentActivity[] @relation("ActivityActor")
+}
+
+// ─── Customers (GDPR-sensitive) ─────────────────────────────────────────
+
+model Customer {
+  id                    String    @id @default(cuid())
+  // Personal data — pseudonymised on right-to-erasure
+  fullName              String
+  dateOfBirth           DateTime
+  email                 String    @unique
+  phone                 String
+  addressLine1          String
+  addressLine2          String?
+  city                  String
+  postcode              String
+  // DVLA-style licence fields, captured by Customer Onboarding agent OCR
+  licenceNumber         String    @unique
+  licenceIssued         DateTime?
+  licenceExpires        DateTime?
+  licenceCategories     String[]  @default([])
+  licencePoints         Int       @default(0)
+  // GDPR consent capture (Article 7)
+  consentText           String    @db.Text
+  consentSignedAt       DateTime
+  consentSignatureSvg   String    @db.Text
+  consentIpAddress      String
+  // Verification flags from onboarding
+  addressMatchesLicence Boolean   @default(false)
+  livenessScore         Float?
+  onboardingFlags       String[]  @default([])
+  onboardingStatus      OnboardingStatus @default(PENDING_REVIEW)
+  // Soft-delete / right-to-erasure
+  deletionRequestedAt   DateTime?
+  pseudonymisedAt       DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  // Relations
+  licenceImages         LicenceImage[]
+  hires                 Hire[]
+  fines                 Fine[]
+  documents             Document[]
+  @@index([onboardingStatus])
+  @@index([postcode])
+}
+
+enum OnboardingStatus {
+  PENDING_REVIEW
+  VERIFIED
+  REJECTED
+  ARCHIVED
+}
+
+model LicenceImage {
+  id              String   @id @default(cuid())
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  side            LicenceSide
+  s3Key           String   // KMS-encrypted at rest; raw bytes never in DB
+  s3KmsKeyId      String
+  uploadedAt      DateTime @default(now())
+  ocrText         String?  @db.Text
+  // Audit: every retrieval is logged in AccessLog
+  @@index([customerId])
+}
+
+enum LicenceSide {
+  FRONT
+  BACK
+  SELFIE
+}
+
+// ─── Vehicles ───────────────────────────────────────────────────────────
+
+enum VehicleClass {
+  COMPACT
+  EXECUTIVE
+  PREMIUM_SUV
+  ELECTRIC
+  SUV
+  VAN
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  HYBRID
+  ELECTRIC
+  PHEV
+}
+
+enum OwnershipType {
+  OWN
+  PCP
+  HP
+  LEASE_PURCHASE
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  RENTED
+  MAINTENANCE
+  CLEANING
+  OFF_FLEET
+  SOLD
+}
+
+enum RagStatus {
+  GREEN
+  AMBER
+  RED
+}
+
+model Vehicle {
+  id                  String        @id @default(cuid())
+  vrn                 String        @unique           // UK plate
+  make                String
+  model               String
+  trim                String?
+  yearOfManufacture   Int
+  vehicleClass        VehicleClass
+  fuelType            FuelType
+  ownership           OwnershipType
+  v5cReference        String?       // 11-digit V5C document reference for road tax
+  // Acquisition
+  purchasePriceGbp    Int           // pence
+  purchaseDate        DateTime
+  purchaseMileage     Int
+  // Ongoing
+  status              VehicleStatus @default(AVAILABLE)
+  currentMileage      Int
+  monthlyRateGbp      Int           // monthly hire rate in pence
+  ragStatus           RagStatus     @default(GREEN)
+  defleetReason       String?
+  // Compliance dates
+  motDue              DateTime?
+  taxDue              DateTime?
+  insuranceDue        DateTime?
+  // Valuation snapshot (refreshed by Analytics agent)
+  marketValueGbp      Int?
+  salvageAdjustedGbp  Int?
+  valuationProvider   String?
+  valuationAt         DateTime?
+  // Sale (if defleeted)
+  saleDate            DateTime?
+  salePriceGbp        Int?
+  // Telemetry
+  lastTelemetryAt     DateTime?
+  // Relations
+  hires               Hire[]
+  fines               Fine[]
+  motRecords          MotRecord[]
+  serviceRecords      ServiceRecord[]
+  repairInvoices      RepairInvoice[]
+  documents           Document[]
+  procurementOpportunity ProcurementOpportunity? @relation("AcquiredFromOpportunity")
+  acquiredFromOpportunityId String? @unique
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  @@index([status])
+  @@index([ragStatus])
+  @@index([motDue])
+  @@index([taxDue])
+}
+
+// ─── Hires & Agreements ────────────────────────────────────────────────
+
+enum HireStatus {
+  DRAFT
+  AWAITING_SIGNATURE
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Hire {
+  id                String      @id @default(cuid())
+  customerId        String
+  customer          Customer    @relation(fields: [customerId], references: [id])
+  vehicleId         String
+  vehicle           Vehicle     @relation(fields: [vehicleId], references: [id])
+  startDate         DateTime
+  endDate           DateTime
+  totalGbp          Int         // pence
+  weeklyRateGbp     Int
+  status            HireStatus  @default(DRAFT)
+  // Adobe Acrobat Sign integration
+  agreementPdfS3Key String?
+  signedPdfS3Key    String?
+  adobeSignAgreementId String?
+  signedAt          DateTime?
+  // Free-text notes
+  notes             String?     @db.Text
+  fines             Fine[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  @@index([status])
+  @@index([startDate, endDate])
+  @@index([vehicleId, startDate, endDate])
+}
+
+// ─── Fines / PCNs ──────────────────────────────────────────────────────
+
+enum FineStatus {
+  RECEIVED
+  MATCHED
+  CHARGED_TO_CUSTOMER
+  CHALLENGE_PREPARED
+  CHALLENGE_SUBMITTED
+  RESOLVED
+  WRITTEN_OFF
+}
+
+model Fine {
+  id                  String     @id @default(cuid())
+  pcnNumber           String     @unique
+  issuingAuthority    String     // e.g. "Lambeth Council"
+  vrn                 String
+  vehicleId           String?
+  vehicle             Vehicle?   @relation(fields: [vehicleId], references: [id])
+  hireId              String?
+  hire                Hire?      @relation(fields: [hireId], references: [id])
+  customerId          String?
+  customer            Customer?  @relation(fields: [customerId], references: [id])
+  offenceAt           DateTime
+  location            String
+  amountGbp           Int        // pence
+  adminFeeGbp         Int        @default(2500) // £25 default per T&Cs
+  status              FineStatus @default(RECEIVED)
+  noticePhotoS3Key    String
+  ocrText             String?    @db.Text
+  challengeUrl        String?
+  challengePackS3Key  String?
+  receivedAt          DateTime   @default(now())
+  resolvedAt          DateTime?
+  @@index([status])
+  @@index([vrn])
+}
+
+// ─── Maintenance: MOT, road tax, service ───────────────────────────────
+
+enum MotResult {
+  PASS
+  FAIL
+  PRS  // Pass after Rectification at Station
+}
+
+model MotRecord {
+  id              String    @id @default(cuid())
+  vehicleId       String
+  vehicle         Vehicle   @relation(fields: [vehicleId], references: [id])
+  testedAt        DateTime
+  expiresAt       DateTime
+  result          MotResult
+  mileage         Int
+  defects         Json      // {dangerous: [], major: [], minor: [], advisory: []}
+  certificateNumber String?
+  source          String    @default("DVSA")
+  fetchedAt       DateTime  @default(now())
+  @@unique([vehicleId, testedAt])
+  @@index([vehicleId, expiresAt])
+}
+
+model ServiceRecord {
+  id           String    @id @default(cuid())
+  vehicleId    String
+  vehicle      Vehicle   @relation(fields: [vehicleId], references: [id])
+  scheduledAt  DateTime
+  completedAt  DateTime?
+  dealerName   String
+  dealerPhone  String?
+  costGbp      Int?
+  notes        String?
+  invoiceS3Key String?
+  createdAt    DateTime  @default(now())
+  @@index([vehicleId, scheduledAt])
+}
+
+// ─── Procurement ────────────────────────────────────────────────────────
+
+enum ProcurementSource {
+  COPART
+  IAA
+  EBAY
+  AUTOTRADER
+  CAR_AND_CLASSIC
+  FACEBOOK_MARKETPLACE
+  OTHER
+}
+
+enum DamageCategory {
+  CAT_N
+  CAT_S
+  CAT_B
+  CAT_A
+  UNRECORDED
+}
+
+enum ProcurementOutcome {
+  WATCHING
+  BID_PROPOSED
+  BID_APPROVED
+  BID_PLACED
+  WON
+  LOST
+  REJECTED
+}
+
+model ProcurementOpportunity {
+  id                String              @id @default(cuid())
+  source            ProcurementSource
+  externalListingId String
+  url               String
+  vrn               String?
+  make              String
+  model             String
+  yearOfManufacture Int?
+  mileage           Int?
+  damageCategory    DamageCategory      @default(UNRECORDED)
+  askingPriceGbp    Int?
+  recommendedBidGbp Int?
+  matchScore        Float               // 0..1 from Procurement agent
+  rationale         String              @db.Text
+  outcome           ProcurementOutcome  @default(WATCHING)
+  acquiredVehicleId String?             @unique
+  acquiredVehicle   Vehicle?            @relation("AcquiredFromOpportunity", fields: [acquiredVehicleId], references: [id])
+  detectedAt        DateTime            @default(now())
+  resolvedAt        DateTime?
+  @@unique([source, externalListingId])
+  @@index([outcome])
+  @@index([detectedAt])
+}
+
+model ProcurementStrategy {
+  id              String   @id @default(cuid())
+  name            String
+  active          Boolean  @default(true)
+  makes           String[] @default([])
+  models          String[] @default([])
+  maxBidGbp       Int
+  minYear         Int?
+  maxMileage      Int?
+  damageCategories DamageCategory[] @default([])
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ─── Repair invoices (manual upload, OCR-attached by Analytics agent) ──
+
+model RepairInvoice {
+  id           String   @id @default(cuid())
+  vehicleId    String?
+  vehicle      Vehicle? @relation(fields: [vehicleId], references: [id])
+  vrn          String   // captured even when vehicle not yet matched
+  invoiceDate  DateTime
+  supplierName String
+  totalGbp     Int      // pence
+  vatGbp       Int?
+  s3Key        String
+  ocrText      String?  @db.Text
+  lineItems    Json?    // [{description, qty, unitPriceGbp}]
+  uploadedAt   DateTime @default(now())
+  matchedAt    DateTime?
+  @@index([vrn])
+}
+
+// ─── Generic document vault (signed agreements, PCN packs) ─────────────
+
+enum DocumentKind {
+  HIRE_AGREEMENT_DRAFT
+  HIRE_AGREEMENT_SIGNED
+  TRANSFER_OF_LIABILITY_PACK
+  PCN_NOTICE_IMAGE
+  REPAIR_INVOICE
+  V5C
+  INSURANCE_CERTIFICATE
+  OTHER
+}
+
+model Document {
+  id          String       @id @default(cuid())
+  kind        DocumentKind
+  title       String
+  s3Key       String
+  mimeType    String
+  // Polymorphic relations
+  customerId  String?
+  customer    Customer?    @relation(fields: [customerId], references: [id])
+  vehicleId   String?
+  vehicle     Vehicle?     @relation(fields: [vehicleId], references: [id])
+  // Full-text searchable summary the AI retrieves on demand
+  summary     String?      @db.Text
+  uploadedAt  DateTime     @default(now())
+  @@index([kind])
+  @@index([customerId])
+  @@index([vehicleId])
+}
+
+// ─── Agent runtime: activity log + approval queue ──────────────────────
+
+enum AgentName {
+  CUSTOMER_ONBOARDING
+  HIRE_AND_AGREEMENT
+  FINES_AND_PCN
+  FLEET_MAINTENANCE
+  PROCUREMENT
+  ANALYTICS_AND_DEFLEET
+}
+
+enum ActivityKind {
+  TOOL_CALL
+  DECISION
+  NOTIFICATION
+  ERROR
+  APPROVAL_REQUEST
+  APPROVAL_RESOLUTION
+}
+
+// Every agent action lands here. Powers the dashboard "Agent Activity" feed.
+model AgentActivity {
+  id           String      @id @default(cuid())
+  agent        AgentName
+  kind         ActivityKind
+  summary      String      @db.Text
+  // Reasoning + citations stored verbatim from the model response
+  reasoning    String?     @db.Text
+  citations    Json?       // [{source, label}]
+  // Tool call audit
+  toolName     String?
+  toolInput    Json?
+  toolOutput   Json?
+  toolDurationMs Int?
+  // Polymorphic links to the affected entity
+  customerId   String?
+  vehicleId    String?
+  hireId       String?
+  fineId       String?
+  // The operator who reviewed (for ACK / approval events)
+  actorUserId  String?
+  actor        User?       @relation("ActivityActor", fields: [actorUserId], references: [id])
+  occurredAt   DateTime    @default(now())
+  @@index([agent, occurredAt])
+  @@index([occurredAt])
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum ApprovalKind {
+  SEND_HIRE_AGREEMENT
+  SUBMIT_PCN_CHALLENGE
+  CHARGE_CUSTOMER_FOR_FINE
+  PLACE_PROCUREMENT_BID
+  TRIGGER_DEFLEET_SALE
+  CONTACT_CUSTOMER
+}
+
+model Approval {
+  id           String         @id @default(cuid())
+  agent        AgentName
+  kind         ApprovalKind
+  title        String
+  // The intent: serialised tool call the agent wants to execute
+  proposedAction Json
+  // Human-readable explanation + citations the agent built up
+  rationale    String         @db.Text
+  citations    Json?
+  status       ApprovalStatus @default(PENDING)
+  reviewerId   String?
+  reviewer     User?          @relation("ApprovalReviewer", fields: [reviewerId], references: [id])
+  reviewerNote String?
+  // Polymorphic context
+  customerId   String?
+  vehicleId    String?
+  hireId       String?
+  fineId       String?
+  procurementOpportunityId String?
+  createdAt    DateTime       @default(now())
+  resolvedAt   DateTime?
+  expiresAt    DateTime?
+  @@index([status, createdAt])
+  @@index([agent])
+}
+
+// ─── Access log (GDPR — per-licence-image retrieval audit) ─────────────
+
+model AccessLog {
+  id          String   @id @default(cuid())
+  userId      String
+  resource    String   // e.g. "LicenceImage:cltabc123"
+  action      String   // VIEW | DOWNLOAD | DELETE
+  ipAddress   String
+  userAgent   String?
+  occurredAt  DateTime @default(now())
+  @@index([userId, occurredAt])
+  @@index([resource])
+}
