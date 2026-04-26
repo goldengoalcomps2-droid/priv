@@ -1,6 +1,22 @@
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
+import { prisma } from "@fleetpro/db";
+import { NewRentalDialog } from "@/components/new-rental/dialog";
 
-export function TopBar() {
+export async function TopBar() {
+  const [customers, vehicles] = await Promise.all([
+    prisma.customer.findMany({
+      where: { onboardingStatus: "VERIFIED", blacklisted: false },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, fullName: true, email: true, postcode: true },
+      take: 50,
+    }),
+    prisma.vehicle.findMany({
+      where: { status: "AVAILABLE" },
+      orderBy: [{ make: "asc" }, { model: "asc" }],
+      select: { id: true, make: true, model: true, trim: true, vrn: true },
+    }),
+  ]);
+
   return (
     <header className="bg-page border-b border-rule px-8 py-4 flex items-center gap-4">
       <div className="flex-1" />
@@ -13,12 +29,7 @@ export function TopBar() {
           className="w-80 rounded-lg border border-rule bg-card pl-9 pr-3 py-2 text-sm placeholder:text-ink-subtle"
         />
       </label>
-      <button
-        type="button"
-        className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover focus-visible:outline-2"
-      >
-        <Plus className="h-4 w-4" aria-hidden /> New Rental
-      </button>
+      <NewRentalDialog customers={customers} availableVehicles={vehicles} />
     </header>
   );
 }
