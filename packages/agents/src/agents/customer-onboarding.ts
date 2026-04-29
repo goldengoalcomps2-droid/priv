@@ -2,6 +2,13 @@ import { z } from "zod";
 import { prisma, ApprovalKind, OnboardingStatus } from "@fleetpro/db";
 import type { AgentEntry } from "../runtime/types.js";
 import { tool, obj, str, num } from "../tools/shared.js";
+import { ocrDrivingLicence } from "../vision/ocr.js";
+
+/** Resolve an S3 key to in-memory bytes. Replace with the real S3 client
+ *  in production; the signature stays the same so callers don't change. */
+async function fetchS3Bytes(_s3Key: string): Promise<{ bytes: Buffer; mediaType: "image/jpeg" | "image/png" }> {
+  return { bytes: Buffer.alloc(0), mediaType: "image/jpeg" };
+}
 
 /**
  * Customer Onboarding agent
@@ -38,17 +45,13 @@ export const customerOnboardingAgent: AgentEntry = {
         },
         ["frontS3Key", "backS3Key"],
       ),
-      handler: async (_input) => {
-        // Real implementation: call AWS Textract / Google Vision via OCR_PROVIDER
-        return {
-          licenceNumber: "EXTRACTED-LICENCE-NUMBER",
-          fullName: "EXTRACTED NAME",
-          dateOfBirth: "1990-01-01",
-          address: "EXTRACTED ADDRESS",
-          issueDate: "2020-01-01",
-          expiryDate: "2030-01-01",
-          categories: ["B"],
-        };
+      handler: async ({ frontS3Key, backS3Key }) => {
+        // Real Claude Vision call. Front + back are passed together so the
+        // model can correlate (e.g. address on the back vs licence number
+        // on the front).
+        const [front, back] = await Promise.all([fetchS3Bytes(frontS3Key), fetchS3Bytes(backS3Key)]);
+        const ocr = await ocrDrivingLicence({ frontImage: front, backImage: back });
+        return ocr;
       },
     }),
     tool({

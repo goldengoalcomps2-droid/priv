@@ -18,3 +18,8 @@ export { finesAndPcnAgent } from "./agents/fines-and-pcn.js";
 export { fleetMaintenanceAgent } from "./agents/fleet-maintenance.js";
 export { procurementAgent } from "./agents/procurement.js";
 export { analyticsAndDefleetAgent } from "./agents/analytics-and-defleet.js";
+
+// Claude Vision OCR helpers — used directly by API routes outside the
+// agentic loop (e.g. the New Rental wizard's licence upload)
+export { ocrDrivingLicence, ocrPcnNotice, LicenceOcrSchema, PcnOcrSchema } from "./vision/ocr.js";
+export type { LicenceOcr, PcnOcr } from "./vision/ocr.js";
