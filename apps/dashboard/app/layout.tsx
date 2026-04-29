@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Multi-agent dashboard for UK salvage vehicle hire operations",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-GB">
